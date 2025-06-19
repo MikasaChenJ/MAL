@@ -129,238 +129,248 @@
 
   <script>
     // 使用 DOMContentLoaded 事件确保所有HTML元素都已加载完毕再执行脚本
-    document.addEventListener('DOMContentLoaded', () => {
-        // --- 状态管理变量 ---
+document.addEventListener('DOMContentLoaded', () => {
+    // --- 状态管理变量 ---
 
-        // 当前显示模式 ('together', 'mikasa', 'linlin')
-        let currentMode = '';
-        // 倒计时的目标日期对象
-        let targetDate = null;
-        // 定时器ID，用于清除定时器
-        let intervalId = null;
+    // 当前显示模式 ('together', 'mikasa', 'linlin')
+    let currentMode = '';
+    // 倒计时的目标日期对象
+    let targetDate = null;
+    // 定时器ID，用于清除定时器
+    let intervalId = null;
 
-        // --- DOM 元素缓存 ---
+    // --- DOM 元素缓存 ---
 
-        // 为了提高性能，预先获取需要频繁操作的DOM元素
-        const glassCard = document.querySelector('.glass');
-        const contentWrapper = document.querySelector('.content-wrapper');
-        const titleElement = document.getElementById('main-title');
+    // 为了提高性能，预先获取需要频繁操作的DOM元素
+    const glassCard = document.querySelector('.glass');
+    const contentWrapper = document.querySelector('.content-wrapper');
+    const titleElement = document.getElementById('main-title');
 
-        // --- 核心配置数据 ---
+    // --- 核心配置数据 ---
 
-        // 存储生日信息，使用农历
-        const birthdays = {
-            mikasa: { name: 'Mikasa', lunar: { month: 3, day: 18 } },
-            linlin: { name: '琳琳', lunar: { month: 6, day: 19 } }
-        };
-        
-        /**
-         * 计算下一个农历生日对应的公历日期
-         * @param {number} lunarMonth - 农历月份 (1-12)
-         * @param {number} lunarDay - 农历日期 (1-30)
-         * @returns {Date|null} 返回计算出的公历日期对象，如果计算失败则返回null
-         */
-        function getNextLunarBirthday(lunarMonth, lunarDay) {
-            const now = new Date();
-            // 创建一个表示“今天凌晨”的日期对象，用于精确比较，避免时分秒影响
-            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            const currentYear = now.getFullYear();
+    // 存储生日信息，使用农历
+    const birthdays = {
+        mikasa: { name: 'Mikasa', lunar: { month: 3, day: 18 } },
+        linlin: { name: '琳琳', lunar: { month: 6, day: 19 } }
+    };
 
-            // 使用正确的函数 Lunar.fromYmd() 从农历年月日创建对象
-            // 注：该库的 v1.7.2 版本中，lunar2solar 是将农历转为公历的正确方法
-            // lunar() 是更高版本中的别名，为保证兼容性，此处不做修改
-            const solarResultThisYear = Lunar.lunar2solar(currentYear, lunarMonth, lunarDay);
-            if (!solarResultThisYear || solarResultThisYear === -1) return null;
-            
-            let birthday = new Date(solarResultThisYear.year, solarResultThisYear.month - 1, solarResultThisYear.day);
-            
-            // 如果今年的生日已经过去，则计算明年的
-            if (birthday < today) {
-                const solarResultNextYear = Lunar.lunar2solar(currentYear + 1, lunarMonth, lunarDay);
-                if (!solarResultNextYear || solarResultNextYear === -1) return null;
-                birthday = new Date(solarResultNextYear.year, solarResultNextYear.month - 1, solarResultNextYear.day);
-            }
+    function getUpcomingLunarBirthdays(lunarMonth, lunarDay) {
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const birthdays = [];
 
-            return birthday;
+    const lunarYear = LunarYear.fromYear(currentYear);
+    const leapMonth = lunarYear.getLeapMonth();
+
+    // 今年正常月生日
+    const normalLunar = Lunar.fromYmd(currentYear, lunarMonth, lunarDay, false);
+    const normalSolar = normalLunar.getSolar();
+    const normalDate = new Date(normalSolar.getYear(), normalSolar.getMonth() - 1, normalSolar.getDay());
+
+    if (normalDate >= today) {
+        birthdays.push({ date: normalDate, type: '正常月' });
+    }
+
+    // 如果有闰月且等于该生日月份，则加上一个闰生日
+    if (leapMonth === lunarMonth) {
+        const leapLunar = Lunar.fromYmd(currentYear, lunarMonth, lunarDay, true);
+        const leapSolar = leapLunar.getSolar();
+        const leapDate = new Date(leapSolar.getYear(), leapSolar.getMonth() - 1, leapSolar.getDay());
+
+        if (leapDate >= today) {
+            birthdays.push({ date: leapDate, type: '闰月' });
+        }
+    }
+
+    // 如果两个都过了，补明年正常月生日
+    if (birthdays.length === 0) {
+        const nextLunar = Lunar.fromYmd(currentYear + 1, lunarMonth, lunarDay, false);
+        const nextSolar = nextLunar.getSolar();
+        const nextDate = new Date(nextSolar.getYear(), nextSolar.getMonth() - 1, nextSolar.getDay());
+
+        birthdays.push({ date: nextDate, type: '明年' });
+    }
+
+    // 根据时间排序（理论上最多两个，今年的）
+    birthdays.sort((a, b) => a.date - b.date);
+    return birthdays;
+}
+
+
+    /**
+     * 更新倒计时显示
+     * 每秒钟由 setInterval调用
+     */
+    function updateCountdownDisplay() {
+        // 如果目标日期无效，则不执行
+        if (!targetDate || isNaN(targetDate.getTime())) { return; }
+        const now = new Date();
+
+        let diff;
+        // 根据当前模式，计算时间差
+        if (currentMode === 'together') {
+            // “认识”模式：计算过去的时间
+            diff = now - targetDate;
+        } else {
+            // “生日”模式：计算未来的时间
+            diff = targetDate.getTime() - now.getTime();
         }
 
-        /**
-         * 更新倒计时显示
-         * 每秒钟由 setInterval调用
-         */
-        function updateCountdownDisplay() {
-            // 如果目标日期无效，则不执行
-            if (!targetDate || isNaN(targetDate.getTime())) { return; }
-            const now = new Date();
-            
-            let diff;
-            // 根据当前模式，计算时间差
-            if (currentMode === 'together') {
-                // “认识”模式：计算过去的时间
-                diff = now - targetDate;
+        if (isNaN(diff) || diff < 0) { diff = 0; }
+
+        // 将时间差（毫秒）转换为天、时、分、秒
+        const totalSeconds = Math.floor(diff / 1000);
+        const days = Math.floor(totalSeconds / (3600 * 24));
+        const hours = Math.floor((totalSeconds % (3600 * 24)) / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        // 更新页面上的数字
+        updateDigitGroup('days', days);
+        updateDigitGroup('hours', hours);
+        updateDigitGroup('minutes', minutes);
+        updateDigitGroup('seconds', seconds);
+    }
+
+    /**
+     * 设置页面的显示模式（纪念日或生日）
+     * @param {string} mode - 目标模式 ('together', 'mikasa', 'linlin')
+     */
+    function setMode(mode) {
+        if (currentMode === mode && mode !== '') return;
+
+        // 安全检查：确保在切换到生日模式前，农历库已成功加载
+        if (mode !== 'together' && typeof Lunar === 'undefined') {
+            alert('错误：农历日期计算库加载失败，请检查网络连接并刷新页面。');
+            return;
+        }
+        currentMode = mode;
+
+        // 触发淡出动画
+        contentWrapper.classList.add('is-transitioning');
+        glassCard.classList.remove('is-focused');
+
+        // 等待淡出动画结束后，再更新内容并淡入，防止闪烁
+        setTimeout(() => {
+            let titleHTML = '';
+            if (mode === 'together') {
+                targetDate = new Date('2025-06-07T02:21:00');
+                titleHTML =
+                    '<span class="title-segment name-wrapper" id="wrapper-mikasa"><span class="name">Mikasa</span></span>' +
+                    '<span class="title-segment">&nbsp;和&nbsp;</span>' +
+                    '<span class="title-segment name-wrapper" id="wrapper-linlin"><span class="name">琳琳</span></span>' +
+                    '<span class="title-segment">&nbsp;已经认识了</span>';
             } else {
-                // “生日”模式：计算未来的时间
-                diff = targetDate.getTime() - now.getTime();
-            }
-            
-            if (isNaN(diff) || diff < 0) { diff = 0; }
+                const birthdayInfo = birthdays[mode];
+                const upcomingList = getUpcomingLunarBirthdays(birthdayInfo.lunar.month, birthdayInfo.lunar.day);
+                targetDate = upcomingList[0].date;
 
-            // 将时间差（毫秒）转换为天、时、分、秒
-            const totalSeconds = Math.floor(diff / 1000);
-            const days = Math.floor(totalSeconds / (3600 * 24));
-            const hours = Math.floor((totalSeconds % (3600 * 24)) / 3600);
-            const minutes = Math.floor((totalSeconds % 3600) / 60);
-            const seconds = totalSeconds % 60;
-        
-            // 更新页面上的数字
-            updateDigitGroup('days', days);
-            updateDigitGroup('hours', hours);
-            updateDigitGroup('minutes', minutes);
-            updateDigitGroup('seconds', seconds);
-        }
-        
-        /**
-         * 设置页面的显示模式（纪念日或生日）
-         * @param {string} mode - 目标模式 ('together', 'mikasa', 'linlin')
-         */
-        function setMode(mode) {
-            if (currentMode === mode && mode !== '') return;
-
-            // 安全检查：确保在切换到生日模式前，农历库已成功加载
-            if (mode !== 'together' && typeof Lunar === 'undefined') {
-                alert('错误：农历日期计算库加载失败，请检查网络连接并刷新页面。');
-                return;
-            }
-            currentMode = mode;
-
-            // 触发淡出动画
-            contentWrapper.classList.add('is-transitioning');
-            glassCard.classList.remove('is-focused');
-
-            // 等待淡出动画结束后，再更新内容并淡入，防止闪烁
-            setTimeout(() => {
-                try {
-                    let titleHTML = '';
-                    if (mode === 'together') {
-                        targetDate = new Date('2025-06-07T02:21:00');
-                        titleHTML = 
-                            '<span class="title-segment name-wrapper" id="wrapper-mikasa"><span class="name">Mikasa</span></span>' +
-                            '<span class="title-segment">&nbsp;和&nbsp;</span>' +
-                            '<span class="title-segment name-wrapper" id="wrapper-linlin"><span class="name">琳琳</span></span>' +
-                            '<span class="title-segment">&nbsp;已经认识了</span>';
-                    } else {
-                        const birthdayInfo = birthdays[mode];
-                        targetDate = getNextLunarBirthday(birthdayInfo.lunar.month, birthdayInfo.lunar.day);
-                        if (!targetDate) throw new Error('无法计算 ' + birthdayInfo.name + ' 的生日日期。');
-                        
-                        titleHTML = 
-                            '<span class="title-segment">距离&nbsp;</span>' +
-                            '<span class="title-segment name-wrapper" id="wrapper-' + mode + '"><span class="name">' + birthdayInfo.name + '</span></span>' +
-                            '<span class="title-segment">&nbsp;的生日还有</span>' +
-                            '<span class="title-segment"><span class="back-button">(返回)</span></span>';
-                    }
-                    // 更新标题内容
-                    titleElement.innerHTML = titleHTML;
-
-                    // 停止旧的计时器，并立即更新一次显示，然后启动新的计时器
-                    if (intervalId) clearInterval(intervalId);
-                    updateCountdownDisplay(); 
-                    intervalId = setInterval(updateCountdownDisplay, 1000);
-                    // 为新生成的标题元素绑定事件
-                    addEventListenersToTitle();
-                } catch (error) {
-                    console.error("切换模式时发生错误:", error);
-                    titleElement.innerText = "加载内容时出错，请刷新。";
-                } finally {
-                    // 无论成功与否，都恢复显示，防止页面空白
-                    contentWrapper.classList.remove('is-transitioning');
+                if (upcomingList.length === 2) {
+                    titleHTML += `<span class="title-segment">今年你有两个生日哦～</span>`;
+                } else if (upcomingList[0].type === '明年') {
+                    titleHTML += `<span class="title-segment">今年生日已经过啦～</span>`;
                 }
-            }, 400); 
-        }
-        
-        /**
-         * 为标题中的可交互元素（名字、返回按钮）绑定事件
-         */
-        function addEventListenersToTitle() {
-            const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-            const mikasaEl = document.getElementById('wrapper-mikasa');
-            const linlinEl = document.getElementById('wrapper-linlin');
-            const backBtn = document.querySelector('.back-button');
 
-            if(mikasaEl) mikasaEl.addEventListener('click', () => setMode('mikasa'));
-            if(linlinEl) linlinEl.addEventListener('click', () => setMode('linlin'));
-            if(backBtn) backBtn.addEventListener('click', () => setMode('together'));
-            
-            // 仅在PC端（非触摸设备）且为“together”模式时，应用悬停效果
-            if (!isTouchDevice && currentMode === 'together') {
-                const wrappers = [mikasaEl, linlinEl];
-                wrappers.forEach(wrapper => {
-                    if(!wrapper) return;
-                    wrapper.addEventListener('mouseenter', () => {
-                        glassCard.classList.add('is-focused');
-                        wrapper.classList.add('is-active');
-                    });
-                    wrapper.addEventListener('mouseleave', () => {
-                        glassCard.classList.remove('is-focused');
-                        wrapper.classList.remove('is-active');
-                    });
+                titleHTML +=
+                    `<span class="title-segment">距离&nbsp;</span>` +
+                    `<span class="title-segment name-wrapper" id="wrapper-${mode}"><span class="name">${birthdayInfo.name}</span></span>` +
+                    `<span class="title-segment">的${upcomingList[0].type}生日还有</span>` +
+                    `<span class="title-segment"><span class="back-button">(返回)</span></span>`;
+            }
+
+            titleElement.innerHTML = titleHTML;
+
+            if (intervalId) clearInterval(intervalId);
+            updateCountdownDisplay();
+            intervalId = setInterval(updateCountdownDisplay, 1000);
+            addEventListenersToTitle();
+            contentWrapper.classList.remove('is-transitioning');
+        }, 400);
+    }
+
+    /**
+     * 为标题中的可交互元素（名字、返回按钮）绑定事件
+     */
+    function addEventListenersToTitle() {
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        const mikasaEl = document.getElementById('wrapper-mikasa');
+        const linlinEl = document.getElementById('wrapper-linlin');
+        const backBtn = document.querySelector('.back-button');
+
+        if (mikasaEl) mikasaEl.addEventListener('click', () => setMode('mikasa'));
+        if (linlinEl) linlinEl.addEventListener('click', () => setMode('linlin'));
+        if (backBtn) backBtn.addEventListener('click', () => setMode('together'));
+
+        // 仅在PC端（非触摸设备）且为“together”模式时，应用悬停效果
+        if (!isTouchDevice && currentMode === 'together') {
+            const wrappers = [mikasaEl, linlinEl];
+            wrappers.forEach(wrapper => {
+                if (!wrapper) return;
+                wrapper.addEventListener('mouseenter', () => {
+                    glassCard.classList.add('is-focused');
+                    wrapper.classList.add('is-active');
                 });
+                wrapper.addEventListener('mouseleave', () => {
+                    glassCard.classList.remove('is-focused');
+                    wrapper.classList.remove('is-active');
+                });
+            });
+        }
+    }
+
+    /**
+     * 更新单个数字组（如天、小时）的显示
+     * @param {string} groupId - 目标元素ID (e.g., 'days')
+     * @param {number} value - 要显示的数值
+     */
+    function updateDigitGroup(groupId, value) {
+        const groupContainer = document.getElementById(groupId);
+        if (!groupContainer) return;
+        // 天数不补零，其他补零
+        const valueStr = (groupId === 'days') ? String(value) : String(value).padStart(2, '0');
+        // 如果值未变化，则不执行DOM操作以提高性能
+        if (groupContainer.dataset.value === valueStr) return;
+        groupContainer.dataset.value = valueStr;
+
+        // 根据数字的位数，动态增加或删除滚动器
+        while (groupContainer.children.length < valueStr.length) {
+            groupContainer.appendChild(createDigitScroller());
+        }
+        while (groupContainer.children.length > valueStr.length) {
+            groupContainer.removeChild(groupContainer.firstChild);
+        }
+        // 更新每个滚动器的位置
+        for (let i = 0; i < valueStr.length; i++) {
+            const digit = parseInt(valueStr[i], 10);
+            const digitList = groupContainer.children[i].querySelector('.digit-list');
+            if (digitList) {
+                digitList.style.transform = `translateY(-${digit * 1.5}em)`;
             }
         }
+    }
 
-        /**
-         * 更新单个数字组（如天、小时）的显示
-         * @param {string} groupId - 目标元素ID (e.g., 'days')
-         * @param {number} value - 要显示的数值
-         */
-        function updateDigitGroup(groupId, value) {
-            const groupContainer = document.getElementById(groupId);
-            if (!groupContainer) return;
-            // 天数不补零，其他补零
-            const valueStr = (groupId === 'days') ? String(value) : String(value).padStart(2, '0');
-            // 如果值未变化，则不执行DOM操作以提高性能
-            if (groupContainer.dataset.value === valueStr) return;
-            groupContainer.dataset.value = valueStr;
-
-            // 根据数字的位数，动态增加或删除滚动器
-            while (groupContainer.children.length < valueStr.length) {
-                groupContainer.appendChild(createDigitScroller());
-            }
-            while (groupContainer.children.length > valueStr.length) {
-                groupContainer.removeChild(groupContainer.firstChild);
-            }
-            // 更新每个滚动器的位置
-            for (let i = 0; i < valueStr.length; i++) {
-                const digit = parseInt(valueStr[i], 10);
-                const digitList = groupContainer.children[i].querySelector('.digit-list');
-                if (digitList) {
-                    digitList.style.transform = `translateY(-${digit * 1.5}em)`;
-                }
-            }
+    /**
+     * 创建一个数字滚动器的DOM结构
+     * @returns {HTMLElement}
+     */
+    function createDigitScroller() {
+        const container = document.createElement('div');
+        container.className = 'digit-container';
+        const list = document.createElement('div');
+        list.className = 'digit-list';
+        for (let i = 0; i <= 9; i++) {
+            const div = document.createElement('div');
+            div.innerText = i;
+            list.appendChild(div);
         }
+        container.appendChild(list);
+        return container;
+    }
 
-        /**
-         * 创建一个数字滚动器的DOM结构
-         * @returns {HTMLElement}
-         */
-        function createDigitScroller() {
-            const container = document.createElement('div');
-            container.className = 'digit-container';
-            const list = document.createElement('div');
-            list.className = 'digit-list';
-            for (let i = 0; i <= 9; i++) {
-                const div = document.createElement('div');
-                div.innerText = i;
-                list.appendChild(div);
-            }
-            container.appendChild(list);
-            return container;
-        }
-
-        // --- 程序入口 ---
-        // 初始化页面到“together”模式
-        setMode('together');
-    });
+    // --- 程序入口 ---
+    // 初始化页面到“together”模式
+    setMode('together');
+});
   </script>
 </body>
 </html>
