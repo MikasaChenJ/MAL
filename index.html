@@ -1,319 +1,230 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>我们认识了多久</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/lunar-javascript/1.7.2/lunar.min.js" crossorigin="anonymous" defer></script>
-  <style>
-    :root {
-      --transition-duration: 0.4s;
-      --transition-easing: ease-in-out;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>我们认识了多久</title>
 
-    body {
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Nunito', -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
-      background: url('https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1350&q=80') no-repeat center center fixed;
-      background-size: cover;
-      overflow: hidden;
-    }
+<!-- 字体 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
 
-    .glass {
-      background: rgba(255, 255, 255, 0.15);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      padding: 50px 60px;
-      border-radius: 20px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
-      color: #111;
-      text-align: center;
-      animation: slideInFade 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    }
+<!-- 农历库 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lunar-javascript/1.7.2/lunar.min.js" defer></script>
 
-    .content-wrapper {
-      transition: opacity var(--transition-duration) var(--transition-easing);
-    }
+<style>
+:root{--transition-duration:.4s;--transition-easing:ease-in-out;}
+body{
+  margin:0;height:100vh;display:flex;align-items:center;justify-content:center;
+  font-family:'Nunito',-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;
+  background:url('https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1350&q=80')
+            no-repeat center/cover fixed;
+  overflow:hidden;
+}
+.glass{
+  background:rgba(255,255,255,.15);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  padding:50px 60px;border-radius:20px;box-shadow:0 8px 32px rgba(0,0,0,.25);color:#111;text-align:center;
+  animation:slideInFade 1s cubic-bezier(.22,1,.36,1) forwards;
+}
+@keyframes slideInFade{from{opacity:0;transform:translateY(40px);}to{opacity:1;transform:translateY(0);}}
+.content-wrapper{transition:opacity var(--transition-duration) var(--transition-easing);}
+.content-wrapper.is-transitioning{opacity:0;}
 
-    .content-wrapper.is-transitioning {
-      opacity: 0;
-    }
+h1{font-size:1.5em;font-weight:400;margin:0 0 40px;height:3em;display:flex;justify-content:center;align-items:center;line-height:1.4;}
+.title-segment{display:inline-block;transition:filter .5s,opacity .5s,transform .3s;}
+.glass.is-focused .title-segment:not(.is-active){filter:blur(4px);}
+.glass.is-focused .title-segment.is-active .name{transform:scale(1.15);}
+.name{font-weight:700;cursor:pointer;display:inline-block;transition:transform .3s;}
+.back-button{font-size:.8em;color:#333;cursor:pointer;font-weight:700;margin-left:8px;}
+.back-button:hover{text-decoration:underline;}
 
-    h1 {
-      font-size: 1.5em;
-      font-weight: 400;
-      margin: 0 0 40px 0;
-      line-height: 1.4;
-      height: 3em;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+.time-row{display:flex;justify-content:center;align-items:baseline;gap:2.5rem;font-size:4rem;font-weight:700;line-height:1;transition:filter .5s;}
+.glass.is-focused .time-row{filter:blur(4px);}
+.time-unit{display:flex;align-items:baseline;gap:.5rem;}
+.digit-group{display:flex;}
+.digit-container{width:1em;height:1.5em;overflow:hidden;position:relative;}
+.digit-list{display:flex;flex-direction:column;transition:transform .8s cubic-bezier(.68,-.55,.27,1.55);}
+.digit-list div{height:1.5em;text-align:center;line-height:1.5em;}
+.unit-label{font-size:.3em;font-weight:400;text-transform:uppercase;}
 
-    .title-segment {
-      display: inline-block;
-      transition: filter 0.5s ease, opacity 0.5s ease, transform 0.3s ease;
-    }
-
-    .glass.is-focused .title-segment:not(.is-active) {
-      filter: blur(4px);
-    }
-
-    .glass.is-focused .title-segment.is-active .name {
-      transform: scale(1.15);
-    }
-
-    .name {
-      font-weight: 700;
-      cursor: pointer;
-      display: inline-block;
-      transition: transform 0.3s ease;
-    }
-
-    .back-button {
-      font-size: 0.8em;
-      color: #333;
-      cursor: pointer;
-      font-weight: 700;
-      margin-left: 8px;
-    }
-
-    .back-button:hover {
-      text-decoration: underline;
-    }
-
-    .time-row {
-      display: flex;
-      justify-content: center;
-      align-items: baseline;
-      gap: 2.5rem;
-      font-size: 4rem;
-      font-weight: 700;
-      line-height: 1;
-      transition: filter 0.5s ease;
-    }
-
-    .glass.is-focused .time-row {
-      filter: blur(4px);
-    }
-
-    .time-unit { display: flex; align-items: baseline; gap: 0.5rem; }
-    .digit-group { display: flex; }
-    .digit-container { width: 1em; height: 1.5em; overflow: hidden; position: relative; }
-    .digit-list { display: flex; flex-direction: column; transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55); }
-    .digit-list div { height: 1.5em; text-align: center; line-height: 1.5em; }
-    .unit-label { font-size: 0.3em; font-weight: 400; text-transform: uppercase; }
-
-    @media (max-width: 768px) {
-      .glass { padding: 30px; margin: 15px; }
-      h1 { font-size: 1.2em; margin-bottom: 30px; }
-      .time-row { flex-direction: column; align-items: center; gap: 1.5rem; font-size: 3rem; }
-    }
-  </style>
+@media(max-width:768px){
+  .glass{padding:30px;margin:15px;}h1{font-size:1.2em;margin-bottom:30px;}
+  .time-row{flex-direction:column;align-items:center;gap:1.5rem;font-size:3rem;}
+}
+</style>
 </head>
 <body>
   <div class="glass">
     <div class="content-wrapper">
       <h1 id="main-title"></h1>
       <div class="time-row">
-        <div class="time-unit"><div id="days" class="digit-group"></div><span class="unit-label">天</span></div>
-        <div class="time-unit"><div id="hours" class="digit-group"></div><span class="unit-label">小时</span></div>
+        <div class="time-unit"><div id="days"    class="digit-group"></div><span class="unit-label">天</span></div>
+        <div class="time-unit"><div id="hours"   class="digit-group"></div><span class="unit-label">小时</span></div>
         <div class="time-unit"><div id="minutes" class="digit-group"></div><span class="unit-label">分钟</span></div>
         <div class="time-unit"><div id="seconds" class="digit-group"></div><span class="unit-label">秒</span></div>
       </div>
     </div>
   </div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      let currentMode = '';
-      let targetDate = null;
-      let intervalId = null;
+<script>
+/* ------------ 1. 统一网络时间 ------------ */
+let networkNow=null, startLocal=Date.now();
+async function initTime(){
+  try{
+    const ctrl=new AbortController();const timeout=setTimeout(()=>ctrl.abort(),3000);
+    const res=await fetch('https://timeapi.io/api/Time/current/zone?timeZone=Asia/Shanghai',{signal:ctrl.signal});
+    clearTimeout(timeout);
+    if(!res.ok)throw'netErr';
+    const j=await res.json();
+    networkNow=new Date(j.year,j.month-1,j.day,j.hour,j.minute,j.seconds,j.milliSeconds);
+  }catch(e){
+    networkNow=new Date();            // 回退本地
+  }
+}
+function now(){return new Date(networkNow.getTime()+Date.now()-startLocal);}
 
-      const glassCard = document.querySelector('.glass');
-      const contentWrapper = document.querySelector('.content-wrapper');
-      const titleElement = document.getElementById('main-title');
+/* ------------ 2. 生日配置 ------------ */
+const birthdays={ 
+  mikasa:{name:'Mikasa',month:3,day:18,isLunar:true},
+  linlin:{name:'琳琳',  month:6,day:19,isLunar:true }
+};
 
-      const birthdays = {
-        mikasa: { name: 'Mikasa', isLunar: false, isLeap: false, month: 4, day: 11 },
-        linlin: { name: '琳琳', isLunar: true, isLeap: false, month: 6, day: 19 }
-      };
+/* ------------ 3. 数字滚动组件 ------------ */
+function createScroller(){
+  const c=document.createElement('div');c.className='digit-container';
+  const l=document.createElement('div');l.className='digit-list';
+  for(let i=0;i<=9;i++){const d=document.createElement('div');d.textContent=i;l.appendChild(d);}
+  c.appendChild(l);return c;
+}
+function updateGroup(id,val){
+  const g=document.getElementById(id);if(!g)return;
+  const s=(id==='days')?String(val):String(val).padStart(2,'0');
+  if(g.dataset.value===s)return;g.dataset.value=s;
+  while(g.children.length<s.length)g.appendChild(createScroller());
+  while(g.children.length>s.length)g.removeChild(g.firstChild);
+  [...s].forEach((ch,i)=>{g.children[i].querySelector('.digit-list')
+    .style.transform=`translateY(-${parseInt(ch)*1.5}em)`;});
+}
 
-      // 获取网络时间 (已更新为 timeapi.io)
-      async function getNetworkTime() {
-        try {
-          // 使用新的 API URL
-          const res = await fetch('https://timeapi.io/api/Time/current/zone?timeZone=Asia/Shanghai');
-          const data = await res.json();
-          // 根据新的返回格式创建 Date 对象
-          return new Date(data.dateTime);
-        } catch (error) {
-          console.error('无法获取网络时间，回退使用本地时间', error);
-          return new Date(); // fallback
-        }
-      }
+/* ------------ 4. 下一次生日核心算法 ------------ */
+function getNextBirthday(p){
+  const today=now();
 
-      function getNextBirthday(person) {
-        const now = window.cachedNetworkTime ? new Date(window.cachedNetworkTime.getTime() + (Date.now() - window.cachedFetchTime)) : new Date();
-        const currentYear = now.getFullYear();
-        let date;
+  /* ---- 阳历 ---- */
+  if(!p.isLunar){
+    let y=today.getFullYear(),d=new Date(y,p.month-1,p.day),passedAll=false;
+    if(d<today){passedAll=true;d=new Date(++y,p.month-1,p.day);}
+    return{date:d,double:false,label:'',passedFirst:false,passedAll};
+  }
 
-        if (person.isLunar) {
-          const lunarYear = LunarYear.fromYear(currentYear);
-          const lunar = Lunar.fromYmd(currentYear, person.month, person.day, person.isLeap);
-          const solar = lunar.getSolar();
-          date = new Date(solar.getYear(), solar.getMonth() - 1, solar.getDay());
-          if (date < now) {
-            const nextLunar = Lunar.fromYmd(currentYear + 1, person.month, person.day, person.isLeap);
-            const nextSolar = nextLunar.getSolar();
-            date = new Date(nextSolar.getYear(), nextSolar.getMonth() - 1, nextSolar.getDay());
-          }
-        } else {
-          date = new Date(currentYear, person.month - 1, person.day);
-          if (date < now) {
-            date = new Date(currentYear + 1, person.month - 1, person.day);
-          }
-        }
-        return date;
-      }
+  /* ---- 农历 ---- */
+  const solar=(y,isLeap)=>{const l=Lunar.fromYmd(y,p.month,p.day,isLeap);
+    const s=l.getSolar();return new Date(s.getYear(),s.getMonth()-1,s.getDay());};
 
-      function updateCountdownDisplay() {
-        if (!targetDate || isNaN(targetDate.getTime())) return;
-        // 使用与 getNextBirthday 一致的、基于网络时间的当前时间，确保倒计时准确
-        const now = window.cachedNetworkTime ? new Date(window.cachedNetworkTime.getTime() + (Date.now() - window.cachedFetchTime)) : new Date();
-        let diff = currentMode === 'together' ? now - targetDate : targetDate - now;
-        if (diff < 0) diff = 0;
+  const buildYear=y=>{
+    const leap=LunarYear.fromYear(y).getLeapMonth();
+    const arr=[{d:solar(y,false),type:'正常月'}];
+    if(leap===p.month)arr.push({d:solar(y,true),type:'闰月'});
+    return{arr,hasLeap:leap===p.month};
+  };
 
-        const totalSeconds = Math.floor(diff / 1000);
-        const days = Math.floor(totalSeconds / (3600 * 24));
-        const hours = Math.floor((totalSeconds % (3600 * 24)) / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60;
+  let y=today.getFullYear(),{arr,hasLeap}=buildYear(y);
 
-        updateDigitGroup('days', days);
-        updateDigitGroup('hours', hours);
-        updateDigitGroup('minutes', minutes);
-        updateDigitGroup('seconds', seconds);
-      }
+  /* 今年所有生日都过完 -> 跳到下一年 */
+  if(arr.every(i=>i.d<today)){
+    y++;({arr,hasLeap}=buildYear(y));
+    return{
+      date:arr[0].d,double:hasLeap,label:hasLeap?arr[0].type:'',
+      passedFirst:false,passedAll:true
+    };
+  }
 
-      function setMode(mode) {
-        if (currentMode === mode && mode !== '') return;
+  /* 今年至少还有一个生日未过 */
+  const target=arr.find(i=>i.d>=today);
+  const passedFirst=hasLeap && arr[0].d<today;
+  return{
+    date:target.d,double:hasLeap,label:hasLeap?target.type:'',
+    passedFirst,passedAll:false
+  };
+}
 
-        if (mode !== 'together' && typeof Lunar === 'undefined') {
-          console.log('错误：农历库加载失败');
-          return;
-        }
+/* ------------ 5. 全局状态 & 渲染 ------------ */
+let mode='',targetDate=null,timer=null;
+const glass=document.querySelector('.glass');
+const wrap=document.querySelector('.content-wrapper');
+const title=document.getElementById('main-title');
 
-        currentMode = mode;
-        contentWrapper.classList.add('is-transitioning');
-        glassCard.classList.remove('is-focused');
+function tick(){
+  if(!targetDate)return;
+  const diff=(mode==='together')?(now()-targetDate):(targetDate-now());
+  const s=Math.max(0,Math.floor(diff/1000));
+  updateGroup('days',Math.floor(s/86400));
+  updateGroup('hours',Math.floor((s%86400)/3600));
+  updateGroup('minutes',Math.floor((s%3600)/60));
+  updateGroup('seconds',s%60);
+}
 
-        setTimeout(() => {
-          let titleHTML = '';
-          if (mode === 'together') {
-            targetDate = new Date('2025-06-07T02:21:00');
-            titleHTML =
-              '<span class="title-segment name-wrapper" id="wrapper-mikasa"><span class="name">Mikasa</span></span>' +
-              '<span class="title-segment">&nbsp;和&nbsp;</span>' +
-              '<span class="title-segment name-wrapper" id="wrapper-linlin"><span class="name">琳琳</span></span>' +
-              '<span class="title-segment">&nbsp;已经认识了</span>';
-          } else {
-            const person = birthdays[mode];
-            targetDate = getNextBirthday(person);
-            const birthdayType = person.isLunar ? (person.isLeap ? '闰月农历' : '农历') : '阳历';
+function setMode(m){
+  if(mode===m&&m!=='')return;mode=m;
+  wrap.classList.add('is-transitioning');glass.classList.remove('is-focused');
 
-            titleHTML += `<span class="title-segment">距离&nbsp;</span>` +
-              `<span class="title-segment name-wrapper" id="wrapper-${mode}"><span class="name">${person.name}&nbsp;</span></span>` +
-              `<span class="title-segment">的${birthdayType}生日还有</span>` +
-              `<span class="title-segment"><span class="back-button">(返回)</span></span>`;
-          }
+  setTimeout(()=>{
+    let html='';
+    if(m==='together'){
+      targetDate=new Date('2025-06-07T02:21:00');
+      html=`<span class="title-segment name-wrapper" id="w-mikasa"><span class="name">Mikasa</span></span>
+            <span class="title-segment">&nbsp;和&nbsp;</span>
+            <span class="title-segment name-wrapper" id="w-linlin"><span class="name">琳琳</span></span>
+            <span class="title-segment">&nbsp;已经认识了</span>`;
+    }else{
+      const info=birthdays[m];
+      const b=getNextBirthday(info);targetDate=b.date;
 
-          titleElement.innerHTML = titleHTML;
+      /* —— 提示段 —— */
+      if(b.double)        html+=`<span class="title-segment">今年你有两个生日哦～</span>`;
+      if(b.passedFirst)   html+=`<span class="title-segment">第一个生日已经过啦～</span>`;
+      if(b.passedAll)     html+=`<span class="title-segment">今年生日已经过啦～</span>`;
 
-          if (intervalId) clearInterval(intervalId);
-          updateCountdownDisplay();
-          intervalId = setInterval(updateCountdownDisplay, 1000);
-          addEventListenersToTitle();
-          contentWrapper.classList.remove('is-transitioning');
-        }, 400);
-      }
+      /* —— 主体段 —— */
+      const labelTxt=b.label?`${b.label}生日`:'生日';
+      html+=`<span class="title-segment">距离&nbsp;</span>
+             <span class="title-segment name-wrapper" id="w-${m}">
+               <span class="name">${info.name}</span></span>
+             <span class="title-segment">的${labelTxt}还有</span>
+             <span class="title-segment"><span class="back-button">(返回)</span></span>`;
+    }
 
-      function addEventListenersToTitle() {
-        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-        const mikasaEl = document.getElementById('wrapper-mikasa');
-        const linlinEl = document.getElementById('wrapper-linlin');
-        const backBtn = document.querySelector('.back-button');
+    title.innerHTML=html;
+    if(timer)clearInterval(timer);
+    tick();timer=setInterval(tick,1000);
+    bindEvents();wrap.classList.remove('is-transitioning');
+  },400);
+}
 
-        if (mikasaEl) mikasaEl.addEventListener('click', () => setMode('mikasa'));
-        if (linlinEl) linlinEl.addEventListener('click', () => setMode('linlin'));
-        if (backBtn) backBtn.addEventListener('click', () => setMode('together'));
+function bindEvents(){
+  const touch=('ontouchstart'in window)||navigator.maxTouchPoints>0;
+  const m=document.getElementById('w-mikasa');
+  const l=document.getElementById('w-linlin');
+  const back=document.querySelector('.back-button');
 
-        if (!isTouchDevice && currentMode === 'together') {
-          [mikasaEl, linlinEl].forEach(wrapper => {
-            if (!wrapper) return;
-            wrapper.addEventListener('mouseenter', () => {
-              glassCard.classList.add('is-focused');
-              wrapper.classList.add('is-active');
-            });
-            wrapper.addEventListener('mouseleave', () => {
-              glassCard.classList.remove('is-focused');
-              wrapper.classList.remove('is-active');
-            });
-          });
-        }
-      }
+  if(m)m.onclick=()=>setMode('mikasa');
+  if(l)l.onclick=()=>setMode('linlin');
+  if(back)back.onclick=()=>setMode('together');
 
-      function updateDigitGroup(groupId, value) {
-        const groupContainer = document.getElementById(groupId);
-        if (!groupContainer) return;
-        const valueStr = (groupId === 'days') ? String(value) : String(value).padStart(2, '0');
-        if (groupContainer.dataset.value === valueStr) return;
-        groupContainer.dataset.value = valueStr;
-
-        while (groupContainer.children.length < valueStr.length) {
-          groupContainer.appendChild(createDigitScroller());
-        }
-        while (groupContainer.children.length > valueStr.length) {
-          groupContainer.removeChild(groupContainer.firstChild);
-        }
-
-        for (let i = 0; i < valueStr.length; i++) {
-          const digit = parseInt(valueStr[i], 10);
-          const digitList = groupContainer.children[i].querySelector('.digit-list');
-          if (digitList) {
-            digitList.style.transform = `translateY(-${digit * 1.5}em)`;
-          }
-        }
-      }
-
-      function createDigitScroller() {
-        const container = document.createElement('div');
-        container.className = 'digit-container';
-        const list = document.createElement('div');
-        list.className = 'digit-list';
-        for (let i = 0; i <= 9; i++) {
-          const div = document.createElement('div');
-          div.innerText = i;
-          list.appendChild(div);
-        }
-        container.appendChild(list);
-        return container;
-      }
-
-      getNetworkTime().then(time => {
-        window.cachedNetworkTime = time;
-        window.cachedFetchTime = Date.now();
-        setMode('together');
-      });
-
+  if(!touch&&mode==='together'){
+    [m,l].forEach(el=>{
+      if(!el)return;
+      el.onmouseenter=()=>{glass.classList.add('is-focused');el.classList.add('is-active');};
+      el.onmouseleave=()=>{glass.classList.remove('is-focused');el.classList.remove('is-active');};
     });
-  </script>
+  }
+}
+
+/* ------------ 6. 启动 ------------ */
+window.addEventListener('DOMContentLoaded',async()=>{
+  await initTime();startLocal=Date.now();setMode('together');
+});
+</script>
 </body>
 </html>
