@@ -5,12 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>我们认识了多久</title>
 
-<!-- 字体 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
 
-<!-- 农历库 -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lunar-javascript/1.7.2/lunar.min.js" defer></script>
 
 <style>
@@ -19,14 +17,78 @@ body{
   margin:0;height:100vh;display:flex;align-items:center;justify-content:center;
   font-family:'Nunito',-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;
   background:url('https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1350&q=80')
-            no-repeat center/cover fixed;
+          no-repeat center/cover fixed;
   overflow:hidden;
 }
+
+/* --- 新增：加载覆盖层样式 --- */
+#loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  
+  /* 与主卡片一致的毛玻璃效果 */
+  background:rgba(255,255,255,.15);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.6s ease-out, visibility 0.6s ease-out;
+}
+
+#loading-overlay.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.loader {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-top: 4px solid #111; /* 颜色与卡片内文字匹配 */
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 1.2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  margin-top: 20px;
+  font-size: 1.2em;
+  color: #111;
+  font-weight: 700;
+  /* 注意：这里的字体与body保持一致 */
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+}
+/* --- 新增样式结束 --- */
+
+
 .glass{
   background:rgba(255,255,255,.15);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
   padding:50px 60px;border-radius:20px;box-shadow:0 8px 32px rgba(0,0,0,.25);color:#111;text-align:center;
-  animation:slideInFade 1s cubic-bezier(.22,1,.36,1) forwards;
+  
+  /* 修改：默认隐藏，通过JS移除is-loading class来触发动画 */
+  opacity: 0;
+  visibility: hidden;
 }
+
+.glass.is-loaded {
+    opacity: 1;
+    visibility: visible;
+    animation: slideInFade 1s cubic-bezier(.22,1,.36,1) forwards;
+}
+
 @keyframes slideInFade{from{opacity:0;transform:translateY(40px);}to{opacity:1;transform:translateY(0);}}
 .content-wrapper{transition:opacity var(--transition-duration) var(--transition-easing);}
 .content-wrapper.is-transitioning{opacity:0;}
@@ -48,6 +110,8 @@ h1{font-size:1.5em;font-weight:400;margin:0 0 40px;height:3em;display:flex;justi
 .digit-list div{height:1.5em;text-align:center;line-height:1.5em;}
 .unit-label{font-size:.3em;font-weight:400;text-transform:uppercase;}
 
+/* 移除了原有的进度条样式，因为被加载动画替代 */
+
 @media(max-width:768px){
   .glass{padding:30px;margin:15px;}h1{font-size:1.2em;margin-bottom:30px;}
   .time-row{flex-direction:column;align-items:center;gap:1.5rem;font-size:3rem;}
@@ -55,6 +119,12 @@ h1{font-size:1.5em;font-weight:400;margin:0 0 40px;height:3em;display:flex;justi
 </style>
 </head>
 <body>
+
+  <div id="loading-overlay">
+    <div class="loader"></div>
+    <p class="loading-text">加载中...</p>
+  </div>
+  
   <div class="glass">
     <div class="content-wrapper">
       <h1 id="main-title"></h1>
@@ -87,7 +157,7 @@ function now(){return new Date(networkNow.getTime()+Date.now()-startLocal);}
 /* ------------ 2. 生日配置 ------------ */
 const birthdays={ 
   mikasa:{name:'Mikasa',month:3,day:18,isLunar:true},
-  linlin:{name:'琳琳',  month:6,day:19,isLunar:true }
+  linlin:{name:'琳琳',  month:6,day:19,isLunar:true}
 };
 
 /* ------------ 3. 数字滚动组件 ------------ */
@@ -189,10 +259,10 @@ function setMode(m){
       /* —— 主体段 —— */
       const labelTxt=b.label?`${b.label}生日`:'生日';
       html+=`<span class="title-segment">距离&nbsp;</span>
-             <span class="title-segment name-wrapper" id="w-${m}">
-               <span class="name">${info.name}</span></span>
-             <span class="title-segment">的${labelTxt}还有</span>
-             <span class="title-segment"><span class="back-button">(返回)</span></span>`;
+              <span class="title-segment name-wrapper" id="w-${m}">
+                <span class="name">${info.name}</span></span>
+              <span class="title-segment">的${labelTxt}还有</span>
+              <span class="title-segment"><span class="back-button">(返回)</span></span>`;
     }
 
     title.innerHTML=html;
@@ -221,9 +291,26 @@ function bindEvents(){
   }
 }
 
-/* ------------ 6. 启动 ------------ */
-window.addEventListener('DOMContentLoaded',async()=>{
-  await initTime();startLocal=Date.now();setMode('together');
+/* ------------ 6. 启动 (逻辑修改) ------------ */
+window.addEventListener('DOMContentLoaded', async () => {
+    // 3. 获取需要控制的元素
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const glassCard = document.querySelector('.glass');
+
+    // 4. 等待核心加载任务完成
+    await initTime();
+    startLocal = Date.now(); // 重置本地起始时间
+
+    // 5. 开始过渡动画
+    // 隐藏加载动画
+    loadingOverlay.classList.add('hidden');
+    
+    // 显示主内容卡片并触发其入场动画
+    glassCard.classList.add('is-loaded');
+
+    // 6. 初始化内容
+    // 在卡片开始显示后再设置内容，体验更流畅
+    setMode('together');
 });
 </script>
 </body>
