@@ -7,10 +7,8 @@
 
   <link rel="icon" href="image/logo.png" type="image/png">
 
-  <!-- Apple 设备的 Touch Icon -->
   <link rel="apple-touch-icon" href="image/logo.png" sizes="1024x1024">
 
-  <!-- Android 设备 & PWA 图标 -->
   <link rel="icon" href="image/logo.png" sizes="1024x1024" type="image/png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,7 +21,7 @@
     body{
       margin:0;height:100vh;display:flex;align-items:center;justify-content:center;
       font-family:'Nunito',-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;
-      background:url('https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1350&q=80')
+      background:url('image/pc.jpg')
             no-repeat center/cover fixed;
       overflow:hidden;
     }
@@ -141,6 +139,9 @@
 
     /* 移动端适配 */
     @media(max-width:768px){
+      body {
+        background: url('image/m.jpg') no-repeat center/cover fixed;
+      }
       .glass {
         padding: 30px 25px;
         margin: 15px;
