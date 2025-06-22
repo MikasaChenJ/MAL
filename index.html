@@ -1,122 +1,178 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>我们认识了多久</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>我们认识了多久</title>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="image/logo.png" type="image/png">
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/lunar-javascript/1.7.2/lunar.min.js" defer></script>
+  <!-- Apple 设备的 Touch Icon -->
+  <link rel="apple-touch-icon" href="image/logo.png" sizes="1024x1024">
 
-<style>
-:root{--transition-duration:.4s;--transition-easing:ease-in-out;}
-body{
-  margin:0;height:100vh;display:flex;align-items:center;justify-content:center;
-  font-family:'Nunito',-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;
-  background:url('https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1350&q=80')
-          no-repeat center/cover fixed;
-  overflow:hidden;
-}
+  <!-- Android 设备 & PWA 图标 -->
+  <link rel="icon" href="image/logo.png" sizes="1024x1024" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
 
-/* --- 新增：加载覆盖层样式 --- */
-#loading-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  
-  /* 与主卡片一致的毛玻璃效果 */
-  background:rgba(255,255,255,.15);
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
-  
-  opacity: 1;
-  visibility: visible;
-  transition: opacity 0.6s ease-out, visibility 0.6s ease-out;
-}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lunar-javascript/1.7.2/lunar.min.js" defer></script>
 
-#loading-overlay.hidden {
-  opacity: 0;
-  visibility: hidden;
-}
+  <style>
+    :root{--transition-duration:.4s;--transition-easing:ease-in-out;}
+    body{
+      margin:0;height:100vh;display:flex;align-items:center;justify-content:center;
+      font-family:'Nunito',-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;
+      background:url('https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1350&q=80')
+            no-repeat center/cover fixed;
+      overflow:hidden;
+    }
 
-.loader {
-  border: 4px solid rgba(0, 0, 0, 0.1);
-  border-top: 4px solid #111; /* 颜色与卡片内文字匹配 */
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
-  animation: spin 1.2s linear infinite;
-}
+    /* --- 加载覆盖层样式 --- */
+    #loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background:rgba(255,255,255,.15);
+      backdrop-filter:blur(12px);
+      -webkit-backdrop-filter:blur(12px);
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.6s ease-out, visibility 0.6s ease-out;
+    }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
+    #loading-overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
 
-.loading-text {
-  margin-top: 20px;
-  font-size: 1.2em;
-  color: #111;
-  font-weight: 700;
-  /* 注意：这里的字体与body保持一致 */
-  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
-}
-/* --- 新增样式结束 --- */
+    .loader {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-top: 4px solid #111;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1.2s linear infinite;
+    }
 
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
 
-.glass{
-  background:rgba(255,255,255,.15);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  padding:50px 60px;border-radius:20px;box-shadow:0 8px 32px rgba(0,0,0,.25);color:#111;text-align:center;
-  
-  /* 修改：默认隐藏，通过JS移除is-loading class来触发动画 */
-  opacity: 0;
-  visibility: hidden;
-}
+    .loading-text {
+      margin-top: 20px;
+      font-size: 1.2em;
+      color: #111;
+      font-weight: 700;
+      font-family: 'Nunito', -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+    }
 
-.glass.is-loaded {
-    opacity: 1;
-    visibility: visible;
-    animation: slideInFade 1s cubic-bezier(.22,1,.36,1) forwards;
-}
+    .glass{
+      background:rgba(255,255,255,.15);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+      padding:50px 60px;border-radius:20px;box-shadow:0 8px 32px rgba(0,0,0,.25);color:#111;text-align:center;
+      opacity: 0;
+      visibility: hidden;
+    }
 
-@keyframes slideInFade{from{opacity:0;transform:translateY(40px);}to{opacity:1;transform:translateY(0);}}
-.content-wrapper{transition:opacity var(--transition-duration) var(--transition-easing);}
-.content-wrapper.is-transitioning{opacity:0;}
+    .glass.is-loaded {
+        opacity: 1;
+        visibility: visible;
+        animation: slideInFade 1s cubic-bezier(.22,1,.36,1) forwards;
+    }
 
-h1{font-size:1.5em;font-weight:400;margin:0 0 40px;height:3em;display:flex;justify-content:center;align-items:center;line-height:1.4;}
-.title-segment{display:inline-block;transition:filter .5s,opacity .5s,transform .3s;}
-.glass.is-focused .title-segment:not(.is-active){filter:blur(4px);}
-.glass.is-focused .title-segment.is-active .name{transform:scale(1.15);}
-.name{font-weight:700;cursor:pointer;display:inline-block;transition:transform .3s;}
-.back-button{font-size:.8em;color:#333;cursor:pointer;font-weight:700;margin-left:8px;}
-.back-button:hover{text-decoration:underline;}
+    @keyframes slideInFade{from{opacity:0;transform:translateY(40px);}to{opacity:1;transform:translateY(0);}}
+    .content-wrapper{transition:opacity var(--transition-duration) var(--transition-easing);}
+    .content-wrapper.is-transitioning{opacity:0;}
 
-.time-row{display:flex;justify-content:center;align-items:baseline;gap:2.5rem;font-size:4rem;font-weight:700;line-height:1;transition:filter .5s;}
-.glass.is-focused .time-row{filter:blur(4px);}
-.time-unit{display:flex;align-items:baseline;gap:.5rem;}
-.digit-group{display:flex;}
-.digit-container{width:1em;height:1.5em;overflow:hidden;position:relative;}
-.digit-list{display:flex;flex-direction:column;transition:transform .8s cubic-bezier(.68,-.55,.27,1.55);}
-.digit-list div{height:1.5em;text-align:center;line-height:1.5em;}
-.unit-label{font-size:.3em;font-weight:400;text-transform:uppercase;}
+    /* --- 核心修改：优化标题H1的样式 --- */
+    h1 {
+      font-size: 1.5em;
+      font-weight: 400;
+      margin: 0 auto 40px; /* 使用auto外边距辅助居中 */
+      max-width: 90%; /* 限制最大宽度，给左右留出空间 */
+      min-height: 3em; /* 【修改】使用min-height代替height，允许容器高度根据内容扩展 */
+      display: flex;
+      flex-wrap: wrap; /* 【新增】允许flex项目优雅地换行 */
+      justify-content: center;
+      align-items: center;
+      line-height: 1.4;
+    }
 
-/* 移除了原有的进度条样式，因为被加载动画替代 */
+    .title-segment{display:inline-block;transition:filter .5s,opacity .5s,transform .3s;}
+    .glass.is-focused .title-segment:not(.is-active){filter:blur(4px);}
+    .glass.is-focused .title-segment.is-active .name{transform:scale(1.15);}
+    .name{font-weight:700;cursor:pointer;display:inline-block;transition:transform .3s;}
+    .back-button{font-size:.8em;color:#333;cursor:pointer;font-weight:700;margin-left:8px;}
+    .back-button:hover{text-decoration:underline;}
 
-@media(max-width:768px){
-  .glass{padding:30px;margin:15px;}h1{font-size:1.2em;margin-bottom:30px;}
-  .time-row{flex-direction:column;align-items:center;gap:1.5rem;font-size:3rem;}
-}
-</style>
+    .time-row{display:flex;justify-content:center;align-items:baseline;gap:2.5rem;font-size:4rem;font-weight:700;line-height:1;transition:filter .5s;}
+    .glass.is-focused .time-row{filter:blur(4px);}
+    .time-unit{display:flex;align-items:baseline;gap:.5rem;}
+    .digit-group{display:flex;}
+    .digit-container{width:1em;height:1.5em;overflow:hidden;position:relative;}
+    .digit-list{display:flex;flex-direction:column;transition:transform .8s cubic-bezier(.68,-.55,.27,1.55);}
+    .digit-list div{height:1.5em;text-align:center;line-height:1.5em;}
+    .unit-label{font-size:.3em;font-weight:400;text-transform:uppercase;}
+
+    /* 页脚样式 */
+    footer {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background-color: rgba(51, 51, 51, 0.7);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      color: white;
+      padding: 10px;
+      text-align: center;
+      font-size: 14px;
+    }
+    footer #hitokoto_text {
+      margin-bottom: 5px;
+    }
+
+    /* 移动端适配 */
+    @media(max-width:768px){
+      .glass {
+        padding: 30px 25px;
+        margin: 15px;
+      }
+      
+      /* --- 核心修改：优化移动端标题字体与行高 --- */
+      h1 {
+        font-size: 1.15em; /* 微调字体大小以适应小屏幕 */
+        margin-bottom: 25px;
+        line-height: 1.5; /* 调整行高，使换行后更美观 */
+        max-width: 100%; /* 在卡片内占满可用宽度 */
+      }
+      
+      .time-row {
+        flex-direction: column;
+        align-items: center;
+        gap: 1.2rem;
+        font-size: 2.5rem;
+      }
+      footer {
+        padding: 15px 10px;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+      footer p {
+          margin: 0 15px;
+      }
+      footer #hitokoto_text {
+          margin-bottom: 8px;
+      }
+    }
+  </style>
 </head>
 <body>
 
@@ -261,7 +317,7 @@ function setMode(m){
       html+=`<span class="title-segment">距离&nbsp;</span>
               <span class="title-segment name-wrapper" id="w-${m}">
                 <span class="name">${info.name}</span></span>
-              <span class="title-segment">的${labelTxt}还有</span>
+              <span class="title-segment">&nbsp;的${labelTxt}还有</span>
               <span class="title-segment"><span class="back-button">(返回)</span></span>`;
     }
 
@@ -291,27 +347,37 @@ function bindEvents(){
   }
 }
 
-/* ------------ 6. 启动 (逻辑修改) ------------ */
+/* ------------ 6. 启动 ------------ */
 window.addEventListener('DOMContentLoaded', async () => {
-    // 3. 获取需要控制的元素
     const loadingOverlay = document.getElementById('loading-overlay');
     const glassCard = document.querySelector('.glass');
 
-    // 4. 等待核心加载任务完成
     await initTime();
-    startLocal = Date.now(); // 重置本地起始时间
+    startLocal = Date.now(); 
 
-    // 5. 开始过渡动画
-    // 隐藏加载动画
     loadingOverlay.classList.add('hidden');
-    
-    // 显示主内容卡片并触发其入场动画
     glassCard.classList.add('is-loaded');
 
-    // 6. 初始化内容
-    // 在卡片开始显示后再设置内容，体验更流畅
     setMode('together');
+    
+    // 每日一言
+    fetch('https://v1.hitokoto.cn?c=i')
+      .then(response => response.json())
+      .then(data => {
+        const hitokoto = document.getElementById('hitokoto_text');
+        hitokoto.innerText = `“${data.hitokoto}”`;
+        const from = document.createElement('p');
+        from.textContent = `— ${data.from_who || ''}《${data.from}》`;
+        hitokoto.parentNode.insertBefore(from, hitokoto.nextSibling);
+      })
+      .catch(console.error)
 });
 </script>
+
+<footer>
+  <p id="hitokoto_text">正在获取今日一言...</p>
+  <p>&copy; 2025 By Mikasa & Linlin. All Rights Reserved.</p>
+  </footer>
+
 </body>
 </html>
