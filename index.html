@@ -519,6 +519,17 @@ const App = {
    */
   updateView(newMode) {
     if (STATE.currentMode === newMode) return;
+    
+    // ===== 修改开始: 检查是否为琳琳的生日并跳转 =====
+    if (newMode === 'linlin') {
+      const person = CONFIG.people.find(p => p.key === 'linlin');
+      if (person && Services.Time.isBirthdayToday(person)) {
+        window.location.href = '2025birthday.html';
+        return; // 阻止后续代码执行
+      }
+    }
+    // ===== 修改结束 =====
+
     STATE.currentMode = newMode;
     
     DOM.contentWrapper.classList.add('is-transitioning');

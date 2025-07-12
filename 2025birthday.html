@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="image/logo.png" sizes="1024x1024" type="image/png">
+    <title>🔨不到我</title>
+    <style>
+        :root {
+            --purple-1: #4a00e0;
+            --purple-2: #8e2de2;
+            --text-color: #f0f0f0;
+            --highlight-color: #ffccff;
+            --apple-font: -apple-system, BlinkMacSystemFont, "SF Pro SC", "SF Pro Display", "SF Pro Icons", "PingFang SC", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            overflow-x: hidden;
+            background: #000;
+            color: var(--text-color);
+            font-family: var(--apple-font);
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        html::-webkit-scrollbar, body::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* --- 加载动画样式 --- */
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, .85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            opacity: 1;
+            visibility: visible;
+            transition: opacity .6s ease-out, visibility .6s ease-out;
+        }
+        #loading-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .loader {
+            border: 4px solid rgba(255, 255, 255, .2);
+            border-top: 4px solid #fff;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1.2s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg) }
+            100% { transform: rotate(360deg) }
+        }
+        .loading-text {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #fff;
+            font-weight: 700;
+        }
+        
+        /* --- 点击开始界面样式 --- */
+        #start-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9998;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #000;
+            opacity: 1;
+            transition: opacity .5s ease;
+        }
+        #start-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        #start-button {
+            font-family: var(--apple-font);
+            font-size: 1.2rem;
+            color: #fff;
+            background: transparent;
+            border: 2px solid #fff;
+            padding: 12px 25px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all .3s ease;
+        }
+        #start-button:hover {
+            background: #fff;
+            color: #000;
+        }
+
+        /* --- 主要内容样式 --- */
+        #three-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            outline: none;
+        }
+        #scroll-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4000vh;
+            z-index: 1;
+        }
+        #content-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+        }
+        #intro-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            color: #fff;
+            font-family: var(--apple-font);
+            font-weight: 600;
+            pointer-events: none;
+        }
+        #special-unlocked {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            opacity: 0;
+        }
+        #scroll-prompt {
+            position: absolute;
+            bottom: 5%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            opacity: 0;
+            animation: jump-breathe 2.5s infinite;
+        }
+        @keyframes jump-breathe {
+            0%, 100% { opacity: 0.4; transform: translate(-50%, 0); }
+            50% { opacity: 1; transform: translate(-50%, -10px); }
+        }
+        #intro-title-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: clamp(6rem, 18vw, 12rem);
+            overflow: hidden;
+            position: relative;
+        }
+        .intro-word {
+            position: absolute;
+            white-space: nowrap;
+        }
+        .text-section {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 1100px;
+            text-align: left;
+            font-size: clamp(2rem, 2vw, 2rem);
+            line-height: 2.2;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.8), 0 0 15px rgba(0, 0, 0, 0.6);
+            opacity: 0;
+        }
+        .chapter-heading {
+            font-family: var(--apple-font);
+            font-weight: 700;
+            font-size: clamp(5rem, 8vw, 8rem);
+            text-align: center;
+            max-width: 180vw;
+            width: auto;
+            text-indent: 0;
+            line-height: 1.4;
+            color: var(--text-color);
+        }
+        .intro-hey {
+            font-family: var(--apple-font);
+            font-weight: 600;
+            font-size: clamp(5rem, 12vw, 10rem);
+            text-align: center;
+            text-indent: 0;
+            line-height: 1.4;
+            color: var(--text-color);
+        }
+        .text-section p {
+            margin-bottom: 1.5em;
+            text-indent: 2em;
+        }
+        .chapter-heading p {
+            text-indent: 0;
+            text-align: center;
+        }
+        .text-section .english-quote {
+            text-indent: 0;
+            text-align: center;
+            font-family: var(--apple-font);
+            color: var(--highlight-color);
+            font-size: 1.2em;
+            display: block;
+            margin-top: 2em;
+            margin-bottom: 2em;
+        }
+        .text-section h1 {
+            text-align: center;
+            font-family: var(--apple-font);
+            font-weight: 700;
+            font-size: clamp(5rem, 8vw, 8rem);
+            color: var(--highlight-color);
+            text-shadow: 0 0 20px var(--purple-2);
+        }
+        #password-section p {
+            text-align: center;
+            text-indent: 0;
+        }
+        #password-section {
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading-overlay">
+        <div class="loader"></div>
+        <p class="loading-text">加载中...</p>
+    </div>
+
+    <div id="start-overlay">
+        <button id="start-button">点击开始</button>
+    </div>
+
+    <canvas id="three-canvas"></canvas>
+    
+    <div id="intro-container">
+        <div id="special-unlocked">Special Unlocked</div>
+        <div id="scroll-prompt">滑动以继续</div>
+        <div id="intro-title-container">
+            <span id="intro-hey" class="intro-word">Hey</span>
+            <span id="intro-linlin-left" class="intro-word">琳</span>
+            <span id="intro-linlin-right" class="intro-word">琳</span>
+        </div>
+    </div>
+
+    <div id="scroll-container"></div>
+    <div id="content-container">
+        <section class="text-section">
+            <p>今天，我们聊点别的，不谈过去，只祝贺当下。关于我们如何相识，一句带过就足够：英文是个不错的开端，让我们有机会认识彼此。故事的序章不必冗长，精彩的永远是正文。而今天，正文的主角是你。</p>
+        </section>
+        <section class="text-section">
+            <p>24岁，这是一个很妙的年纪。它像一道清晰又模糊的分水岭，身后是象牙塔里纯粹的日光，身前是充满无限可能的广阔天地。你不再仅仅是知识的吸收者，更开始成为价值的创造者。</p>
+        </section>
+        <section class="text-section">
+            <p>它也是一个充满“美丽矛盾”的年纪：拥有了足够的经验，让你能看清一些世事；又保留了恰好的天真，让你敢于去冲撞，去质疑。你站在山腰，看得见来路，也望得见远方更高处的风景，脚下有坚实的土地，心中有飞翔的渴望。这真是一个理想的出发点，不是吗？为一场由自己定义规则的，漫长而有趣的比赛。</p>
+        </section>
+        <section class="text-section">
+            <p>所以，在这个特别的节点上，我不打算祝你“万事如意”或者“梦想成真”，那些祝福太过宏大、遥远，甚至有点敷衍。我更想祝你一些具体、实在，能真正握在手里的东西。</p>
+        </section>
+        
+        <section class="text-section chapter-heading"><p>首先，<br>愿你在24岁这一年，<br>拥有“搞砸一些事”的勇气。</p></section>
+        <section class="text-section">
+            <p>我希望你敢于去尝试那些让你心跳加速、跃跃欲试，却又因害怕结果不完美而犹豫不决的事。人生不是一份需要提交给谁的标准答卷，没有绝对的对错，只有不同的体验。去画一幅不满意的画，去写一首不押韵的诗，去走一条地图上没有标记的小路。</p>
+        </section>
+        <section class="text-section">
+            <p>别害怕失败，因为“完美”有时是个精致的牢笼，它会限制你的想象力，消耗你的锐气。真正的成长，往往不是来自一次性的成功，而是源于每一次搞砸之后，你拍拍尘土，重新站起来，然后决定“再试一次”的那个瞬间。</p>
+        </section>
+        <section class="text-section">
+            <p>如同一个陶艺家，从不畏惧将一个不成形的作品重新揉成泥土，因为创造的乐趣在于过程本身，而非那个最终被摆上货架的成品。</p>
+            <p class="english-quote">Life isn't about finding yourself. Life is about creating yourself.</p>
+            <p>去创造，去体验，哪怕结果是一团糟，那也是独属于你的、无可替代的一团糟。</p>
+        </section>
+
+        <section class="text-section chapter-heading"><p>其次，<br>愿你找到并尽情享受那些“无用”的快乐。</p></section>
+        <section class="text-section">
+            <p>我们身处一个被量化的时代，效率、指标、KPI……一切似乎都指向某个明确的目的。但人生的丰盈，恰恰藏在那些“无用”的时光里。</p>
+        </section>
+        <section class="text-section">
+            <p>那可能是一个无所事事的午后，你靠在窗边看光影一寸寸挪移；可能是一杯恰到好处的咖啡，它的香气让你短暂地从繁杂的思绪中抽离；可能是一场淋漓尽致的落日，天空的色彩变幻，让你惊叹于自然这位最伟大的艺术家；也可能是一首让你无限循环的老歌，在熟悉的旋律里，与过去的某个自己不期而遇。</p>
+        </section>
+        <section class="text-section">
+            <p>这些看似“浪费时间”的小事，无法为你带来任何实际的收益，但它们是滋养灵魂的空气和水。它们是乐章里必要的休止符，是画卷里精妙的留白，正是这些“无用”的瞬间，让那些“有用”的奋斗时刻，显得更加有意义。愿你永远保有这份感知力，能从平凡的日常中，提炼出属于自己的黄金时刻。</p>
+        </section>
+
+        <section class="text-section chapter-heading"><p>再者，<br>愿你的善良，永远带着锋芒。</p></section>
+        <section class="text-section">
+            <p>善良是一种珍贵的品质，但没有原则的善良，有时会变成对自己的消耗。我希望你的善良，既能温暖他人，也能保护自己。这份锋芒，不是攻击性，而是一种清晰的界限感。</p>
+        </section>
+        <section class="text-section">
+            <p>它让你懂得如何温柔而坚定地拒绝，让你有能力对那些让你不舒服的人和事，说一声“到此为止”。你的知识、你的见识、你的专业能力，都是你日益增长的底气。这份底气，能让你在任何关系里，都保持不卑不亢的从容和体面。就像一个拥有篱笆的花园，既能与邻居分享芬芳，也能防止不速之客的践踏。这是一种清醒的、有选择的善良，是一种对自己负责的温柔。</p>
+        </section>
+        <section class="text-section">
+            <p class="english-quote">Here's to another chapter, may it be one of your own writing.</p>
+            <p>别让他人的期待定义你的剧本，也别被社会的标准绑架你的选择。你的笔，务必、一定，要紧紧握在自己手里。写你想写的故事，成为你想成为的人。</p>
+        </section>
+
+        <section class="text-section chapter-heading"><p>最后，<br>我想聊聊我们的友谊。</p></section>
+        <section class="text-section">
+            <p>它就像书架上一本你很喜欢的书，不必每天翻阅，甚至有时会蒙上薄薄的灰尘。但你心里永远知道它就在那里，安安静静地占据着一个位置。当你需要的时候，随时可以取下来，掸去灰尘，翻开任何一页，里面的故事和文字依旧熟悉、依旧温暖。(即使你总会经常看见我让你叫我爸爸的页面。😄)</p>
+        </section>
+        <section class="text-section">
+            <p>更有趣的是，随着你自己的成长，每一次重读，或许都会有新的发现和感悟。友谊亦是如此，我们各自成长，又在交流中互相映照。</p>
+        </section>
+        <section class="text-section">
+            <p>未来的航线会驶向何方，我们都无法预料。但很高兴，在彼此的航行日志里，有过这么一段明亮而愉快的交集。这段共同的记忆，会像夜航时天边那颗让人安心的星，它不一定是最亮的，但你知道它就在那个方向，这就足够了。</p>
+        </section>
+        <section class="text-section">
+            <p>好了，洋洋洒洒，说得不少了。</p>
+            <p>千言万语，归根结底，就是一句最简单也最真诚的话：</p>
+        </section>
+        <section class="text-section" id="password-section">
+            <h1>生日快乐</h1>
+            <p>By Mikasa</p>
+            <p>2025. 夏</p>
+        </section>
+    </div>
+
+    <audio id="background-music" loop></audio>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <script>
+        window.addEventListener('load', () => {
+            // 所有资源加载完成后，等待3秒
+            setTimeout(() => {
+                // 3秒后，隐藏加载动画
+                const loadingOverlay = document.getElementById('loading-overlay');
+                loadingOverlay.classList.add('hidden');
+
+                // --- 定义所有元素和函数 ---
+                const startOverlay = document.getElementById('start-overlay');
+                const startButton = document.getElementById('start-button');
+                const musicPlayer = document.getElementById('background-music');
+                musicPlayer.src = 'onelastkiss.mp3';
+
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 6000);
+                const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('three-canvas'), antialias: true });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                scene.fog = new THREE.FogExp2(0x000000, 0.0007);
+
+                const particlesCount = 50000;
+                const positions = new Float32Array(particlesCount * 3);
+                const colors = new Float32Array(particlesCount * 3);
+                const color = new THREE.Color();
+                const starfieldSize = 5000;
+                for (let i = 0; i < particlesCount; i++) {
+                    positions[i * 3]     = (Math.random() - 0.5) * starfieldSize;
+                    positions[i * 3 + 1] = (Math.random() - 0.5) * starfieldSize;
+                    positions[i * 3 + 2] = (Math.random() - 0.5) * starfieldSize;
+                    color.setHSL(0.75 + Math.random() * 0.1, 0.9, 0.6 + Math.random() * 0.2);
+                    colors[i * 3]     = color.r;
+                    colors[i * 3 + 1] = color.g;
+                    colors[i * 3 + 2] = color.b;
+                }
+                const particlesGeometry = new THREE.BufferGeometry();
+                particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+                const particlesMaterial = new THREE.PointsMaterial({ size: 3.5, vertexColors: true, sizeAttenuation: true });
+                const stars = new THREE.Points(particlesGeometry, particlesMaterial);
+                scene.add(stars);
+
+                gsap.registerPlugin(ScrollTrigger);
+                
+                const introHey = document.getElementById('intro-hey');
+                const introLinLeft = document.getElementById('intro-linlin-left');
+                const introLinRight = document.getElementById('intro-linlin-right');
+                gsap.set([introHey, introLinLeft, introLinRight], { opacity: 0 });
+
+                // --- 把动画和交互逻辑绑定到按钮点击事件 ---
+                startButton.addEventListener('click', () => {
+                    // 1. 隐藏开始界面
+                    startOverlay.classList.add('hidden');
+
+                    // 2. 播放音乐
+                    musicPlayer.play().catch(e => console.error("Music playback failed:", e));
+
+                    // 3. 开始执行所有动画
+                    const preScrollTl = gsap.timeline();
+                    preScrollTl.to("#special-unlocked", { opacity: 1, duration: 2, ease: "power2.out" })
+                               .to("#scroll-prompt", { opacity: 1, duration: 1.5 }, "+=3");
+
+                    const masterTl = gsap.timeline({
+                        scrollTrigger: {
+                            trigger: "#scroll-container",
+                            start: "top top",
+                            end: "bottom bottom",
+                            scrub: 1.5,
+                        }
+                    });
+
+                    masterTl.to(["#special-unlocked", "#scroll-prompt"], { opacity: 0, duration: 2 });
+                    masterTl.to(introHey, { opacity: 1, scale: 1, duration: 4 }, "<");
+                    masterTl.to(introLinLeft, { opacity: 1, x: '-55%', duration: 8, ease: 'power2.inOut' });
+                    masterTl.to(introLinRight, { opacity: 1, x: '55%', duration: 8, ease: 'power2.inOut' }, "<");
+                    masterTl.to(introHey, { opacity: 0, scale: 0.5, duration: 6, ease: 'power2.inOut' }, "<+1");
+                    masterTl.to("#intro-title-container", { opacity: 0, duration: 3 });
+                    masterTl.set("#intro-container", { display: "none" });
+
+                    const textSections = document.querySelectorAll('.text-section');
+                    const initialCameraZ = 400;
+                    camera.position.set(0, 0, initialCameraZ);
+
+                    textSections.forEach((section, index) => {
+                        const isLastSection = index === textSections.length - 1;
+                        const zMovement = 120;
+                        
+                        masterTl.to(camera.position, {
+                            x: (Math.random() - 0.5) * 150,
+                            y: (Math.random() - 0.5) * 100,
+                            z: initialCameraZ - (index + 1) * zMovement,
+                            duration: 10,
+                            ease: "power1.inOut"
+                        }, `scene${index}`);
+                        masterTl.to(camera.rotation, {
+                            x: `+=${(Math.random() - 0.5) * 0.4}`,
+                            y: `+=${(Math.random() - 0.5) * 0.4}`,
+                            duration: 10,
+                            ease: "power1.inOut"
+                        }, `scene${index}`);
+
+                        if (section.classList.contains('chapter-heading')) {
+                            masterTl.fromTo(section, 
+                                { opacity: 0, scale: 0.8, filter: 'blur(10px)' },
+                                { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 4, ease: 'power3.out' },
+                                `scene${index}+=3`
+                            );
+                        } else if (section.querySelector('.english-quote')) {
+                            masterTl.fromTo(section, { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 3 }, `scene${index}+=3`);
+                            masterTl.from(section.querySelector('.english-quote'), { opacity: 0, scale: 0.7, duration: 4, ease: 'elastic.out(1, 0.7)' }, `scene${index}+=4`);
+                        } else {
+                            masterTl.fromTo(section, 
+                                { opacity: 0, y: 50 }, 
+                                { opacity: 1, y: 0, duration: 4, ease: "power2.out" }, 
+                                `scene${index}+=3`
+                            );
+                        }
+
+                        if (!isLastSection) {
+                            masterTl.to(section, { opacity: 0, scale: 0.95, duration: 3, ease: "power2.out" }, `scene${index}+=8`);
+                        }
+                    });
+
+                }, { once: true }); // 事件只触发一次
+
+                // --- 渲染与自适应 ---
+                const animate = () => {
+                    stars.rotation.y += 0.0002;
+                    stars.rotation.z += 0.0002;
+                    renderer.render(scene, camera);
+                    requestAnimationFrame(animate);
+                };
+                animate();
+
+                window.addEventListener('resize', () => {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                });
+
+            }, 3000); // 强制等待的3秒钟
+        });
+    </script>
+</body>
+</html>
