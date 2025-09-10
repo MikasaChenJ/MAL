@@ -1,87 +1,73 @@
-:root{--transition-duration:.4s;--transition-easing:ease-in-out;}
-    body{
-      margin:0;height:100vh;display:flex;align-items:center;justify-content:center;
-      font-family:'Nunito',-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;
-      background-repeat: no-repeat;
-      background-position: center;
-      background-size: cover;
-      background-attachment: fixed;
-      overflow:hidden;
-      transition: background-image 1s ease-in-out;
-    }
+:root { --transition-duration: .4s; --transition-easing: ease-in-out; }
+body { margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center; font-family: 'Nunito', -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif; background-repeat: no-repeat; background-position: center; background-size: cover; background-attachment: fixed; overflow: hidden; transition: background-image 1s ease-in-out; }
 
-    #loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,.15);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);opacity:1;visibility:visible;transition:opacity .6s ease-out,visibility .6s ease-out;}
-    #loading-overlay.hidden{opacity:0;visibility:hidden;}
-    .loader{border:4px solid rgba(0,0,0,.1);border-top:4px solid #111;border-radius:50%;width:60px;height:60px;animation:spin 1.2s linear infinite;}
-    @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
-    .loading-text{margin-top:20px;font-size:1.2em;color:#111;font-weight:700;}
+#loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(255,255,255,.15); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); opacity: 1; visibility: visible; transition: opacity .6s ease-out, visibility .6s ease-out; }
+#loading-overlay.hidden { opacity: 0; visibility: hidden; }
+.loader { border: 4px solid rgba(0,0,0,.1); border-top: 4px solid #111; border-radius: 50%; width: 60px; height: 60px; animation: spin 1.2s linear infinite; }
+@keyframes spin { 0% { transform: rotate(0deg) } 100% { transform: rotate(360deg) } }
+.loading-text { margin-top: 20px; font-size: 1.2em; color: #111; font-weight: 700; }
 
-    .glass{position:relative;background:rgba(255,255,255,.15);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:50px 60px;border-radius:20px;box-shadow:0 8px 32px rgba(0,0,0,.25);color:#111;text-align:center;opacity:0;visibility:hidden;}
-    .glass.is-loaded{opacity:1;visibility:visible;animation:slideInFade 1s cubic-bezier(.22,1,.36,1) forwards;}
-    @keyframes slideInFade{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
-    .content-wrapper{transition:opacity var(--transition-duration) var(--transition-easing);}
-    .content-wrapper.is-transitioning{opacity:0;}
+#gallery-btn { position: fixed; top: 25px; right: 25px; z-index: 1001; width: 40px; height: 40px; background-color: rgba(0,0,0,0.1); color: #333; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .3s ease; }
+#gallery-btn:hover { background-color: rgba(0,0,0,0.2); transform: scale(1.05); }
 
-    h1{font-size:1.5em;font-weight:400;margin:0 auto 40px;max-width:90%;min-height:3em;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;line-height:1.4;}
-    .title-segment{display:inline-block;transition:filter .5s,opacity .5s,transform .3s;}
-    .glass.is-focused .title-segment:not(.is-active){filter:blur(4px);}
-    .glass.is-focused .title-segment.is-active .name{transform:scale(1.15);}
-    .name{font-weight:700;cursor:pointer;display:inline-block;transition:transform .3s;}
+.glass { position: relative; background: rgba(255,255,255,.15); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 50px 60px; border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,.25); color: #111; text-align: center; opacity: 0; visibility: hidden; }
+.glass.is-loaded { opacity: 1; visibility: visible; animation: slideInFade 1s cubic-bezier(.22,1,.36,1) forwards; }
+@keyframes slideInFade { from { opacity: 0; transform: translateY(40px) } to { opacity: 1; transform: translateY(0) } }
+.content-wrapper { transition: opacity var(--transition-duration) var(--transition-easing); }
+.content-wrapper.is-transitioning { opacity: 0; }
 
-    .top-left-back-button{position:absolute;top:25px;left:25px;width:32px;height:32px;background-color:rgba(0,0,0,.08);border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s ease;opacity:1;visibility:visible;}
-    .top-left-back-button:hover{background-color:rgba(0,0,0,.15);transform:scale(1.05);}
-    .top-left-back-button::before{content:'';width:10px;height:10px;border-top:2px solid #333;border-left:2px solid #333;transform:translateX(2px) rotate(-45deg);}
-    .top-left-back-button.is-hidden{opacity:0;visibility:hidden;pointer-events:none;}
-    
-    .time-row{display:flex;justify-content:center;align-items:baseline;gap:2.5rem;font-size:4rem;font-weight:700;line-height:1;transition:filter .5s;}
-    .glass.is-focused .time-row{filter:blur(4px);}
-    .time-unit{display:flex;align-items:baseline;gap:.5rem;}
-    .digit-group{display:flex;}
-    .digit-container{width:1em;height:1.5em;overflow:hidden;position:relative;}
-    .digit-list{display:flex;flex-direction:column;transition:transform .8s cubic-bezier(.68,-.55,.27,1.55);}
-    .digit-list div{height:1.5em;text-align:center;line-height:1.5em;}
-    .unit-label{font-size:.3em;font-weight:400;text-transform:uppercase;}
+h1 { font-size: 1.5em; font-weight: 400; margin: 0 auto 40px; max-width: 90%; min-height: 3em; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; line-height: 1.4; }
+.title-segment { display: inline-block; transition: filter .5s, opacity .5s, transform .3s; }
+.glass.is-focused .title-segment:not(.is-active) { filter: blur(4px); }
+.glass.is-focused .title-segment.is-active .name { transform: scale(1.15); }
+.name { font-weight: 700; cursor: pointer; display: inline-block; transition: transform .3s; }
 
-    #birthday-display{display:none;font-size:4rem;font-weight:700;line-height:1.2;align-items:center;justify-content:center;}
-    #birthday-display .birthday-text{background:linear-gradient(45deg,#ff007f,#ffae00,#48ff00,#00d5ff,#7a00ff);background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:gradient-text 4s linear infinite;}
-    @keyframes gradient-text{to{background-position:200% center}}
-    .glass.is-birthday .time-row{display:none;}
-    .glass.is-birthday #birthday-display{display:flex;}
+.top-left-back-button { position: absolute; top: 25px; left: 25px; width: 32px; height: 32px; background-color: rgba(0,0,0,.08); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .3s ease; opacity: 1; visibility: visible; }
+.top-left-back-button:hover { background-color: rgba(0,0,0,.15); transform: scale(1.05); }
+.top-left-back-button::before { content: ''; width: 10px; height: 10px; border-top: 2px solid #333; border-left: 2px solid #333; transform: translateX(2px) rotate(-45deg); }
+.top-left-back-button.is-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
 
-    footer{position:fixed;bottom:0;width:100%;background-color:rgba(51,51,51,.7);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);color:white;padding:10px;text-align:center;font-size:14px;}
-    footer #hitokoto_text{margin-bottom:5px;}
+.time-row { display: flex; justify-content: center; align-items: baseline; gap: 2.5rem; font-size: 4rem; font-weight: 700; line-height: 1; transition: filter .5s; }
+.glass.is-focused .time-row { filter: blur(4px); }
+.time-unit { display: flex; align-items: baseline; gap: .5rem; }
+.digit-group { display: flex; }
+.digit-container { width: 1em; height: 1.5em; overflow: hidden; position: relative; }
+.digit-list { display: flex; flex-direction: column; transition: transform .8s cubic-bezier(.68,-.55,.27,1.55); }
+.digit-list div { height: 1.5em; text-align: center; line-height: 1.5em; }
+.unit-label { font-size: .3em; font-weight: 400; text-transform: uppercase; }
 
-    #gallery-btn { margin-top: 30px; padding: 10px 20px; font-size: 1em; font-weight: 700; color: #333; background-color: rgba(255,255,255,0.2); border: 1px solid rgba(0,0,0,0.1); border-radius: 10px; cursor: pointer; transition: all 0.3s ease; }
-    #gallery-btn:hover { background-color: rgba(255,255,255,0.4); transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+#birthday-display { display: none; font-size: 4rem; font-weight: 700; line-height: 1.2; align-items: center; justify-content: center; }
+#birthday-display .birthday-text { background: linear-gradient(45deg,#ff007f,#ffae00,#48ff00,#00d5ff,#7a00ff); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: gradient-text 4s linear infinite; }
+@keyframes gradient-text { to { background-position: 200% center } }
+.glass.is-birthday .time-row { display: none; }
+.glass.is-birthday #birthday-display { display: flex; }
 
-    #gallery-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 10000; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s ease; }
-    #gallery-overlay.visible { opacity: 1; visibility: visible; }
+footer { position: fixed; bottom: 0; width: 100%; background-color: rgba(51,51,51,.7); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); color: white; padding: 10px; text-align: center; font-size: 14px; z-index: 10; }
+footer #hitokoto_text { margin-bottom: 5px; }
 
-    #gallery-close-btn { position: absolute; top: 30px; right: 40px; background: none; border: none; font-size: 3rem; color: #fff; cursor: pointer; transition: transform 0.3s ease; }
-    #gallery-close-btn:hover { transform: rotate(90deg); }
+#gallery-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 10000; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s ease; }
+#gallery-overlay.visible { opacity: 1; visibility: visible; }
+#gallery-close-btn { position: absolute; top: 30px; right: 40px; background: none; border: none; font-size: 3rem; color: #fff; cursor: pointer; transition: transform 0.3s ease; }
+#gallery-close-btn:hover { transform: rotate(90deg); }
+#gallery-content { color: #fff; text-align: center; max-width: 80vw; max-height: 80vh; overflow-y: auto; padding: 40px; }
+#gallery-content h2 { font-size: 2.5rem; margin-bottom: 40px; }
+#gallery-cards-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; }
+.gallery-card { background-size: cover; background-position: center; border-radius: 15px; aspect-ratio: 3/4; position: relative; overflow: hidden; cursor: pointer; transition: transform 0.4s ease, box-shadow 0.4s ease; display: flex; align-items: flex-end; text-decoration: none; }
+.gallery-card:hover { transform: translateY(-10px) scale(1.03); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+.gallery-card::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to top, rgba(0,0,0,0.8) 10%, transparent 50%); }
+.gallery-card-info { padding: 20px; z-index: 1; color: #fff; }
+.gallery-card-info .year { font-size: 2rem; font-weight: 700; }
+.gallery-card-info .title { font-size: 1rem; margin-top: 5px; }
 
-    #gallery-content { color: #fff; text-align: center; max-width: 80vw; max-height: 80vh; overflow-y: auto; padding: 40px; }
-    #gallery-content h2 { font-size: 2.5rem; margin-bottom: 40px; }
-
-    #gallery-cards-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; }
-
-    .gallery-card { background-size: cover; background-position: center; border-radius: 15px; aspect-ratio: 3/4; position: relative; overflow: hidden; cursor: pointer; transition: transform 0.4s ease, box-shadow 0.4s ease; display: flex; align-items: flex-end; text-decoration: none; }
-    .gallery-card:hover { transform: translateY(-10px) scale(1.03); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
-
-    .gallery-card::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to top, rgba(0,0,0,0.8) 10%, transparent 50%); }
-
-    .gallery-card-info { padding: 20px; z-index: 1; color: #fff; }
-    .gallery-card-info .year { font-size: 2rem; font-weight: 700; }
-    .gallery-card-info .title { font-size: 1rem; margin-top: 5px; }
-
-    @media(max-width:768px){
-      .glass{padding:30px 25px;margin:15px;}
-      h1{font-size:1.15em;margin-bottom:25px;line-height:1.5;max-width:100%;}
-      .top-left-back-button{top:15px;left:15px;}
-      .time-row,#birthday-display{flex-direction:column;align-items:center;gap:1.2rem;font-size:2.5rem;}
-      footer{padding:15px 10px;font-size:13px;line-height:1.6;}
-      footer p{margin:0 15px;}
-      footer #hitokoto_text{margin-bottom:8px;}
-      #gallery-content { max-width: 90vw; }
-      #gallery-content h2 { font-size: 2rem; }
-    }
+@media (max-width: 768px) {
+  #gallery-btn { top: 15px; right: 15px; width: 38px; height: 38px; }
+  .glass { padding: 30px 25px; margin: 15px; }
+  h1 { font-size: 1.15em; margin-bottom: 25px; line-height: 1.5; max-width: 100%; }
+  .top-left-back-button { top: 15px; left: 15px; }
+  .time-row, #birthday-display { flex-direction: column; align-items: center; gap: 1.2rem; font-size: 2.5rem; }
+  footer { padding: 15px 10px; font-size: 13px; line-height: 1.6; }
+  footer p { margin: 0 15px; }
+  footer #hitokoto_text { margin-bottom: 8px; }
+  #gallery-content { max-width: 90vw; }
+  #gallery-content h2 { font-size: 2rem; }
+}
