@@ -1,0 +1,237 @@
+        :root {
+            --purple-1: #4a00e0;
+            --purple-2: #8e2de2;
+            --text-color: #f0f0f0;
+            --highlight-color: #ffccff;
+            --apple-font: -apple-system, BlinkMacSystemFont, "SF Pro SC", "SF Pro Display", "SF Pro Icons", "PingFang SC", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            overflow-x: hidden;
+            background: #000;
+            color: var(--text-color);
+            font-family: var(--apple-font);
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        html::-webkit-scrollbar, body::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* --- 加载动画样式 --- */
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, .85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            opacity: 1;
+            visibility: visible;
+            transition: opacity .6s ease-out, visibility .6s ease-out;
+        }
+        #loading-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .loader {
+            border: 4px solid rgba(255, 255, 255, .2);
+            border-top: 4px solid #fff;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1.2s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg) }
+            100% { transform: rotate(360deg) }
+        }
+        .loading-text {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #fff;
+            font-weight: 700;
+        }
+        
+        /* --- 点击开始界面样式 --- */
+        #start-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9998;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #000;
+            opacity: 1;
+            transition: opacity .5s ease;
+        }
+        #start-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        #start-button {
+            font-family: var(--apple-font);
+            font-size: 1.2rem;
+            color: #fff;
+            background: transparent;
+            border: 2px solid #fff;
+            padding: 12px 25px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all .3s ease;
+        }
+        #start-button:hover {
+            background: #fff;
+            color: #000;
+        }
+
+        /* --- 主要内容样式 --- */
+        #three-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            outline: none;
+        }
+        #scroll-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4000vh;
+            z-index: 1;
+        }
+        #content-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+        }
+        #intro-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            color: #fff;
+            font-family: var(--apple-font);
+            font-weight: 600;
+            pointer-events: none;
+        }
+        #special-unlocked {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            opacity: 0;
+        }
+        #scroll-prompt {
+            position: absolute;
+            bottom: 5%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            opacity: 0;
+            animation: jump-breathe 2.5s infinite;
+        }
+        @keyframes jump-breathe {
+            0%, 100% { opacity: 0.4; transform: translate(-50%, 0); }
+            50% { opacity: 1; transform: translate(-50%, -10px); }
+        }
+        #intro-title-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: clamp(6rem, 18vw, 12rem);
+            overflow: hidden;
+            position: relative;
+        }
+        .intro-word {
+            position: absolute;
+            white-space: nowrap;
+        }
+        .text-section {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 1100px;
+            text-align: left;
+            font-size: clamp(2rem, 2vw, 2rem);
+            line-height: 2.2;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.8), 0 0 15px rgba(0, 0, 0, 0.6);
+            opacity: 0;
+        }
+        .chapter-heading {
+            font-family: var(--apple-font);
+            font-weight: 700;
+            font-size: clamp(5rem, 8vw, 8rem);
+            text-align: center;
+            max-width: 180vw;
+            width: auto;
+            text-indent: 0;
+            line-height: 1.4;
+            color: var(--text-color);
+        }
+        .intro-hey {
+            font-family: var(--apple-font);
+            font-weight: 600;
+            font-size: clamp(5rem, 12vw, 10rem);
+            text-align: center;
+            text-indent: 0;
+            line-height: 1.4;
+            color: var(--text-color);
+        }
+        .text-section p {
+            margin-bottom: 1.5em;
+            text-indent: 2em;
+        }
+        .chapter-heading p {
+            text-indent: 0;
+            text-align: center;
+        }
+        .text-section .english-quote {
+            text-indent: 0;
+            text-align: center;
+            font-family: var(--apple-font);
+            color: var(--highlight-color);
+            font-size: 1.2em;
+            display: block;
+            margin-top: 2em;
+            margin-bottom: 2em;
+        }
+        .text-section h1 {
+            text-align: center;
+            font-family: var(--apple-font);
+            font-weight: 700;
+            font-size: clamp(5rem, 8vw, 8rem);
+            color: var(--highlight-color);
+            text-shadow: 0 0 20px var(--purple-2);
+        }
+        #password-section p {
+            text-align: center;
+            text-indent: 0;
+        }
+        #password-section {
+            pointer-events: auto;
+        }

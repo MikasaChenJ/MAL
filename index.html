@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>我们认识了多久</title>
+
+  <link rel="icon" href="image/logo.png" type="image/png">
+  <link rel="apple-touch-icon" href="image/logo.png" sizes="1024x1024">
+  <link rel="icon" href="image/logo.png" sizes="1024x1024" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lunar-javascript/1.7.2/lunar.min.js" defer></script>
+
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+  <div id="loading-overlay">
+    <div class="loader"></div>
+    <p class="loading-text">加载中...</p>
+  </div>
+  
+  <div class="glass">
+    <a id="back-to-main" class="top-left-back-button is-hidden" title="返回"></a>
+    <div class="content-wrapper">
+      <h1 id="main-title"></h1>
+      <div class="time-row">
+        <div class="time-unit"><div id="days"    class="digit-group"></div><span class="unit-label">天</span></div>
+        <div class="time-unit"><div id="hours"   class="digit-group"></div><span class="unit-label">小时</span></div>
+        <div class="time-unit"><div id="minutes" class="digit-group"></div><span class="unit-label">分钟</span></div>
+        <div class="time-unit"><div id="seconds" class="digit-group"></div><span class="unit-label">秒</span></div>
+      </div>
+      <div id="birthday-display"></div>
+      <button id="gallery-btn">生日回顾</button>
+    </div>
+  </div>
+
+  <div id="gallery-overlay">
+    <button id="gallery-close-btn">&times;</button>
+    <div id="gallery-content">
+        <h2>回忆画廊</h2>
+        <div id="gallery-cards-container"></div>
+    </div>
+  </div>
+
+  <footer>
+    <p id="hitokoto_text">正在获取今日一言...</p>
+    <p id="copyright"></p>
+  </footer>
+
+<script src="js/main.js"></script>
+
+</body>
+</html>
