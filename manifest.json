@@ -1,21 +1,32 @@
 {
   "name": "我们认识了多久",
   "short_name": "Our Days",
+  "description": "记录相识、生日与每一段值得回看的回忆。",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff",
-  "description": "记录我们相识的日子",
+  "orientation": "portrait-primary",
+  "background_color": "#f7f5ef",
+  "theme_color": "#f7f5ef",
+  "categories": ["lifestyle", "photo", "personalization"],
   "icons": [
     {
-      "src": "image/logo.png",
+      "src": "image/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "image/logo.png",
+      "src": "image/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "image/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }

@@ -1,21 +1,11 @@
-
-
-// 注意：MusicPlayer 目前仍是 player.js 中的全局类
-// 或者我们可以假设它通过 script 标签全局加载。
-// 理想情况下，player.js 也应该是一个模块，但为了简化步骤，我们暂时保持原样
-// 或者如果我们转换它，就导入它。
-// 目前，假设 player.js 仍然是一个 script 标签，所以 `MusicPlayer` 在 window 上。
-// 但是，由于我们切换到了 type="module"（或顺序加载），全局作用域有所不同。
-// 我们应该将 player.js 也转换为模块，或者将其挂载到 window。
-// 让我们尝试导入它（如果可能），或者如果之前已加载，则直接依赖 window.MusicPlayer。
-
 /**
  * =================================================================
  * 视图渲染模块 (RENDERER - Main Helpers)
  * =================================================================
  */
 const Renderer = {
-  renderTitle(html) {
+  renderTitle(html, poster = false) {
+    DOM.mainTitle.classList.toggle('poster-title', poster);
     DOM.mainTitle.innerHTML = html;
   },
   renderBirthdayPage(person) {
@@ -37,7 +27,14 @@ const Renderer = {
     document.body.style.backgroundImage = `url('${bg}')`;
   },
   applyFooter() {
-    DOM.copyright.innerHTML = CONFIG.footer.copyright;
+    if (!DOM.footerDescription) {
+      const description = document.createElement('p');
+      description.id = 'footer-description';
+      DOM.copyright.parentNode.insertBefore(description, DOM.copyright);
+      DOM.footerDescription = description;
+    }
+    DOM.footerDescription.textContent = CONFIG.footer.description;
+    DOM.copyright.textContent = CONFIG.footer.copyright;
   },
 };
 
@@ -47,16 +44,18 @@ const Renderer = {
  * =================================================================
  */
 const App = {
+  touchStartY: 0,
+  lastFocusedElement: null,
+  installPromptEvent: null,
   async init() {
+    const splashStartedAt = performance.now();
     await TimeService.init();
     Renderer.applyBackground();
     Renderer.applyFooter();
     GalleryComponent.render(); // 初始化时渲染画廊
     ApiService.fetchHitokoto();
-    WeatherService.init(); // Initialize Weather (non-blocking)
+    WeatherService.init();
 
-    // 初始化音乐播放器
-    // 假设 MusicPlayer 全局可用，或者我们需要修复 player.js
     if (window.MusicPlayer) {
       this.musicPlayer = new window.MusicPlayer(CONFIG.music);
     } else {
@@ -64,9 +63,13 @@ const App = {
     }
 
     this.bindEvents();
-    DOM.loadingOverlay.classList.add('hidden');
-    DOM.glass.classList.add('is-loaded');
     this.updateView('together');
+
+    const splashDelay = Math.max(0, 620 - (performance.now() - splashStartedAt));
+    window.setTimeout(() => {
+      DOM.loadingOverlay.classList.add('hidden');
+      DOM.glass.classList.add('is-loaded');
+    }, splashDelay);
   },
   bindEvents() {
     DOM.backBtn.addEventListener('click', (e) => {
@@ -74,26 +77,99 @@ const App = {
       this.updateView('together');
     });
     window.addEventListener('resize', Renderer.applyBackground);
-    // 画廊事件
-    DOM.galleryBtn.addEventListener('click', () => {
-      DOM.galleryOverlay.classList.add('visible');
-    });
-    DOM.galleryCloseBtn.addEventListener('click', () => {
-      DOM.galleryOverlay.classList.remove('visible');
-    });
+    DOM.galleryBtn.addEventListener('click', () => this.openTimeline());
+    DOM.galleryCloseBtn.addEventListener('click', () => this.closeTimeline());
     DOM.galleryOverlay.addEventListener('click', (e) => {
       if (e.target === DOM.galleryOverlay) {
-        DOM.galleryOverlay.classList.remove('visible');
+        this.closeTimeline();
       }
     });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && DOM.galleryOverlay.classList.contains('visible')) {
+        this.closeTimeline();
+      }
+    });
+    DOM.galleryContent.addEventListener('touchstart', (e) => {
+      this.touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+    DOM.galleryContent.addEventListener('touchend', (e) => {
+      const endY = e.changedTouches[0].clientY;
+      if (endY - this.touchStartY > 80 && DOM.galleryContent.scrollTop < 8) {
+        this.closeTimeline();
+      }
+    }, { passive: true });
+    this.setupInstallPrompt();
     this.bindDynamicEvents();
+  },
+  setupInstallPrompt() {
+    if (!CONFIG.app.enableInstallPrompt) return;
+
+    window.addEventListener('beforeinstallprompt', (event) => {
+      event.preventDefault();
+      this.installPromptEvent = event;
+
+      if (document.getElementById('install-app-btn')) return;
+      const button = document.createElement('button');
+      button.id = 'install-app-btn';
+      button.className = 'liquid-button install-button';
+      button.type = 'button';
+      button.title = '安装到主屏幕';
+      button.innerHTML = `
+        <span class="button-label">安装</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 3v12"></path>
+          <path d="m7 10 5 5 5-5"></path>
+          <path d="M5 21h14"></path>
+        </svg>`;
+      button.addEventListener('click', () => this.promptInstall(button));
+      document.querySelector('.app-control-dock').prepend(button);
+    });
+
+    window.addEventListener('appinstalled', () => {
+      this.installPromptEvent = null;
+      document.getElementById('install-app-btn')?.remove();
+    });
+  },
+  async promptInstall(button) {
+    if (!this.installPromptEvent) return;
+    await this.installPromptEvent.prompt();
+    const choice = await this.installPromptEvent.userChoice;
+    this.installPromptEvent = null;
+    if (choice.outcome === 'accepted') button.remove();
+  },
+  openTimeline() {
+    this.lastFocusedElement = document.activeElement;
+    DOM.galleryOverlay.classList.add('visible');
+    DOM.galleryOverlay.setAttribute('aria-hidden', 'false');
+    DOM.galleryBtn.setAttribute('aria-expanded', 'true');
+    document.body.classList.add('is-timeline-open');
+    DOM.galleryCloseBtn.focus({ preventScroll: true });
+  },
+  closeTimeline() {
+    DOM.galleryOverlay.classList.remove('visible');
+    DOM.galleryOverlay.setAttribute('aria-hidden', 'true');
+    DOM.galleryBtn.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('is-timeline-open');
+    if (this.lastFocusedElement && typeof this.lastFocusedElement.focus === 'function') {
+      this.lastFocusedElement.focus({ preventScroll: true });
+    }
   },
   bindDynamicEvents() {
     if (STATE.currentMode === 'together') {
       CONFIG.people.forEach(person => {
         const el = document.getElementById(`name-${person.key}`);
         if (el) {
+          el.tabIndex = 0;
+          el.setAttribute('role', 'button');
+          el.setAttribute('aria-label', `查看 ${person.name} 的生日倒计时`);
           el.onclick = () => this.updateView(person.key);
+          el.onkeydown = (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              this.updateView(person.key);
+            }
+          };
           if (!('ontouchstart' in window) && navigator.maxTouchPoints <= 0) {
             el.onmouseenter = () => {
               DOM.glass.classList.add('is-focused');
@@ -143,10 +219,23 @@ const App = {
         DOM.backBtn.classList.add('is-hidden');
         DOM.glass.classList.remove('is-birthday');
         STATE.targetDate = new Date(CONFIG.mainTargetDate);
-        titleHTML = CONFIG.people.map(p =>
-          `<span class="title-segment name-wrapper" id="name-${p.key}"><span class="name">${p.name}</span></span>`
-        ).join('<span class="title-segment">&nbsp;和&nbsp;</span>') + '<span class="title-segment">&nbsp;已经认识了</span>';
-        Renderer.renderTitle(titleHTML);
+        const [firstPerson, secondPerson] = CONFIG.people;
+        titleHTML = `
+          <span class="poster-lockup">
+            <span class="title-segment name-wrapper" id="name-${firstPerson.key}">
+              <span class="name">${firstPerson.name}</span>
+            </span>
+            <span class="poster-connector">和</span>
+            <span class="title-segment name-wrapper" id="name-${secondPerson.key}">
+              <span class="name">${secondPerson.name}</span>
+            </span>
+          </span>
+          <span class="poster-rule" aria-hidden="true"></span>
+          <span class="poster-caption">
+            <span>已经认识了</span>
+            <span class="poster-since">SINCE 2025.06.07</span>
+          </span>`;
+        Renderer.renderTitle(titleHTML, true);
         this.startTimer();
       } else {
         DOM.backBtn.classList.remove('is-hidden');
@@ -170,7 +259,7 @@ const App = {
                         <span class="title-segment">&nbsp;的${labelTxt}还有</span>`;
           this.startTimer();
         }
-        Renderer.renderTitle(titleHTML);
+        Renderer.renderTitle(titleHTML, false);
       }
       this.bindDynamicEvents();
       DOM.contentWrapper.classList.remove('is-transitioning');

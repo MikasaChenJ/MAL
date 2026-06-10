@@ -11,7 +11,10 @@ const ApiService = {
     },
     renderHitokoto(data) {
         DOM.hitokotoText.textContent = `“${data.hitokoto}”`;
+        const existingFrom = document.getElementById('hitokoto_from');
+        if (existingFrom) existingFrom.remove();
         const from = document.createElement('p');
+        from.id = 'hitokoto_from';
         from.textContent = `— ${data.from_who || ''}《${data.from}》`;
         DOM.hitokotoText.parentNode.insertBefore(from, DOM.hitokotoText.nextSibling);
     },

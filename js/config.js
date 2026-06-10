@@ -9,11 +9,24 @@ const CONFIG = {
         mobile: 'image/m.jpg',
     },
     footer: {
-        copyright: 'This website is a gift for you - to celebrate our meeting.&nbsp&nbsp &copy; 2025 By Mikasa & Linlin. All Rights Reserved.',
+        description: 'This website is a gift for you — to celebrate our meeting.',
+        copyright: '© 2025–2026 Mikasa & Linlin. All Rights Reserved.',
     },
     api: {
         hitokoto: 'https://v1.hitokoto.cn?c=i',
         time: 'https://timeapi.io/api/Time/current/zone?timeZone=Asia/Shanghai',
+    },
+    app: {
+        defaultWeatherCity: {
+            name: '杭州市',
+            latitude: 30.2741,
+            longitude: 120.1551,
+        },
+        enableInstallPrompt: true,
+        timelineOpenMode: 'sheet',
+        weatherCacheMinutes: 30,
+        locationCacheDays: 7,
+        geoIpTimeoutMs: 1200,
     },
     music: {
         autoPlay: false, // 浏览器策略可能会阻止自动播放
@@ -21,7 +34,7 @@ const CONFIG = {
             {
                 title: "One Last Kiss",
                 artist: "宇多田光",
-                cover: "image/logo.png", // 占位符
+                cover: "image/icon-512.png?v=2",
                 src: "music/onelastkiss.mp3"
             }
         ]

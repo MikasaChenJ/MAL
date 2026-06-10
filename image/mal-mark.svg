@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">MAL Memory Ribbon</title>
+  <desc id="desc">A continuous ribbon forming an abstract M and L.</desc>
+  <path
+    d="M108 352V194c0-30 36-43 55-20l72 88c11 14 31 14 42-1l61-87c18-25 57-12 57 19v159h55"
+    fill="none"
+    stroke="#111318"
+    stroke-width="48"
+    stroke-linecap="round"
+    stroke-linejoin="round"/>
+</svg>
