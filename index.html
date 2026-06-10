@@ -3,57 +3,66 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#f7f5ef">
   <title>我们认识了多久</title>
 
-  <link rel="icon" href="image/logo.png" type="image/png">
-  <link rel="apple-touch-icon" href="image/logo.png" sizes="1024x1024">
-  <link rel="icon" href="image/logo.png" sizes="1024x1024" type="image/png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
-
+  <link rel="icon" href="image/favicon.png?v=2" sizes="64x64" type="image/png">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="image/apple-touch-icon.png?v=2" sizes="180x180">
   <!-- PWA Configuration -->
 
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Our Days">
-  <link rel="apple-touch-icon" href="image/logo.png">
-
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lunar-javascript/1.7.2/lunar.min.js" defer></script>
 
-  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/main.css?v=20260610-footer-fit">
 </head>
 
 <body>
+  <div class="ambient-light ambient-light-one" aria-hidden="true"></div>
+  <div class="ambient-light ambient-light-two" aria-hidden="true"></div>
 
   <div id="loading-overlay">
-    <div class="splash-logo">
-      <img src="image/logo.png" alt="Logo">
+    <div class="splash-card liquid-surface">
+      <div class="splash-logo">
+        <img src="image/mal-mark.svg?v=2" alt="MAL">
+      </div>
+      <p class="loading-text">OUR DAYS</p>
     </div>
-    <p class="loading-text">正在收集回忆...</p>
   </div>
 
-  <div id="weather-widget" class="weather-widget hidden">
-    <span class="weather-city"></span>
-    <div class="weather-icon"></div>
-    <div class="weather-temp">--°</div>
-    <div class="weather-desc">Loading...</div>
+  <div class="app-control-dock liquid-dock" aria-label="应用控制">
+    <div id="weather-widget" class="weather-widget liquid-surface is-pending" aria-live="polite">
+      <span class="weather-city">杭州市</span>
+      <div class="weather-icon">--</div>
+      <div class="weather-temp">--°</div>
+      <div class="weather-desc">天气加载中</div>
+    </div>
+
+    <button id="gallery-btn" class="liquid-button" type="button" title="回忆时间线" aria-controls="gallery-overlay"
+      aria-expanded="false">
+      <span class="button-label">回忆时间线</span>
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 5v14"></path>
+        <circle cx="12" cy="7" r="2"></circle>
+        <circle cx="12" cy="17" r="2"></circle>
+        <path d="M14 7h5"></path>
+        <path d="M5 17h5"></path>
+      </svg>
+    </button>
   </div>
 
-  <button id="gallery-btn" title="回忆画廊">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-      <line x1="3" y1="9" x2="21" y2="9"></line>
-      <line x1="9" y1="21" x2="9" y2="9"></line>
-    </svg>
-  </button>
-
-  <div class="glass">
-    <a id="back-to-main" class="top-left-back-button is-hidden" title="返回"></a>
+  <main class="glass liquid-surface" aria-live="polite">
+    <button id="back-to-main" class="top-left-back-button liquid-button is-hidden" type="button" title="返回"
+      aria-label="返回主页"></button>
     <div class="content-wrapper">
-      <h1 id="main-title"></h1>
+      <header class="memory-heading">
+        <p class="memory-kicker">OUR DAYS · 相识纪念</p>
+        <h1 id="main-title"></h1>
+      </header>
       <div class="time-row">
         <div class="time-unit">
           <div id="days" class="digit-group"></div><span class="unit-label">天</span>
@@ -69,32 +78,37 @@
         </div>
       </div>
       <div id="birthday-display"></div>
+      <p class="memory-hint">点击名字，查看下一次生日</p>
     </div>
-  </div>
+  </main>
 
-  <div id="gallery-overlay">
-    <button id="gallery-close-btn">&times;</button>
-    <div id="gallery-content">
-      <h2>回忆画廊</h2>
+  <div id="gallery-overlay" class="timeline-overlay" aria-hidden="true">
+    <div id="gallery-content" class="liquid-sheet" role="dialog" aria-modal="true" aria-labelledby="timeline-title">
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <button id="gallery-close-btn" class="liquid-button" type="button" aria-label="关闭回忆时间线">&times;</button>
+      <p class="eyebrow">OUR MEMORY ARCHIVE</p>
+      <h2 id="timeline-title">回忆时间线</h2>
+      <p class="timeline-intro">每一年的特别页面都会留在这里。选择一个日期，重新打开当时的故事。</p>
       <div id="gallery-cards-container"></div>
     </div>
   </div>
 
-  <footer>
+  <footer class="liquid-surface">
     <p id="hitokoto_text">正在获取今日一言...</p>
+    <p id="footer-description"></p>
     <p id="copyright"></p>
   </footer>
 
-  <script src="js/config.js"></script>
-  <script src="js/state.js"></script>
-  <script src="js/utils/dom.js"></script>
-  <script src="js/services/time.js"></script>
-  <script src="js/services/api.js"></script>
-  <script src="js/services/weather.js"></script>
-  <script src="js/components/countdown.js"></script>
-  <script src="js/components/gallery.js"></script>
-  <script src="js/player.js"></script>
-  <script src="js/main.js"></script>
+  <script src="js/config.js?v=20260610-typography-v2"></script>
+  <script src="js/state.js?v=20260610-typography-v2"></script>
+  <script src="js/utils/dom.js?v=20260610-typography-v2"></script>
+  <script src="js/services/time.js?v=20260610-typography-v2"></script>
+  <script src="js/services/api.js?v=20260610-typography-v2"></script>
+  <script src="js/services/weather.js?v=20260610-typography-v2"></script>
+  <script src="js/components/countdown.js?v=20260610-typography-v2"></script>
+  <script src="js/components/gallery.js?v=20260610-typography-v2"></script>
+  <script src="js/player.js?v=20260610-typography-v2"></script>
+  <script src="js/main.js?v=20260610-typography-v2"></script>
 
   <script>
     if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {

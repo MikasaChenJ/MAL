@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">MAL app icon</title>
+  <defs>
+    <linearGradient id="bg" x1="70" y1="34" x2="444" y2="478" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8FCFF"/>
+      <stop offset=".52" stop-color="#DCEAF3"/>
+      <stop offset="1" stop-color="#BFD3E2"/>
+    </linearGradient>
+    <radialGradient id="shine" cx="0" cy="0" r="1" gradientTransform="translate(166 112) rotate(47) scale(322)">
+      <stop stop-color="#FFFFFF" stop-opacity=".95"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="116" fill="url(#bg)"/>
+  <rect x="2" y="2" width="508" height="508" rx="114" fill="url(#shine)"/>
+  <path
+    d="M112 350V198c0-27 33-39 50-18l70 85c11 13 29 13 39-1l59-84c17-23 52-11 52 18v152h54"
+    fill="none"
+    stroke="#111318"
+    stroke-width="45"
+    stroke-linecap="round"
+    stroke-linejoin="round"/>
+</svg>

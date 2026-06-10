@@ -5,12 +5,14 @@ const DOM = {
     mainTitle: document.getElementById('main-title'),
     backBtn: document.getElementById('back-to-main'),
     birthdayDisplay: document.getElementById('birthday-display'),
+    footerDescription: document.getElementById('footer-description'),
     copyright: document.getElementById('copyright'),
     hitokotoText: document.getElementById('hitokoto_text'),
     timeRow: document.querySelector('.time-row'),
     // Gallery Elements
     galleryBtn: document.getElementById('gallery-btn'),
     galleryOverlay: document.getElementById('gallery-overlay'),
+    galleryContent: document.getElementById('gallery-content'),
     galleryCloseBtn: document.getElementById('gallery-close-btn'),
     galleryCardsContainer: document.getElementById('gallery-cards-container'),
     // Weather Elements

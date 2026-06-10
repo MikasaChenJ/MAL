@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">MAL maskable app icon</title>
+  <defs>
+    <linearGradient id="bg" x1="40" y1="20" x2="470" y2="492" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8FCFF"/>
+      <stop offset=".55" stop-color="#DCEAF3"/>
+      <stop offset="1" stop-color="#B7CDDE"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <path
+    d="M132 330V208c0-22 27-32 41-15l58 71c9 11 25 11 34-1l50-70c14-19 43-9 43 15v122h45"
+    fill="none"
+    stroke="#111318"
+    stroke-width="39"
+    stroke-linecap="round"
+    stroke-linejoin="round"/>
+</svg>
